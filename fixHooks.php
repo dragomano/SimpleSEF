@@ -1,13 +1,14 @@
 <?php
-	global $sourcedir;
 
-	$file = $sourcedir . '/SimpleSEF.php';
+global $sourcedir;
 
-	// A check to prevent errors on certain server configurations.
-	if (!file_exists($file))
-		return false;
+$file = $sourcedir . '/SimpleSEF.php';
 
-	require_once($file);
-	$simpleSEF = new SimpleSEF();
-	$simpleSEF->fixHooks(true);
-	unset($simpleSEF);
+// A check to prevent errors on certain server configurations.
+if (!file_exists($file))
+	return false;
+
+require_once($file);
+$simpleSEF = new SimpleSEF();
+$simpleSEF->fixHooks(true);
+unset($simpleSEF);

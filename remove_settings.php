@@ -1,29 +1,5 @@
 <?php
 
-/* * **** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is http://code.mattzuba.com code.
- *
- * The Initial Developer of the Original Code is
- * Matt Zuba.
- * Portions created by the Initial Developer are Copyright (C) 2010-2011
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *
- * ***** END LICENSE BLOCK ***** */
-
 // If SSI.php is in the same place as this file, and SMF isn't defined, this is being run standalone.
 if (file_exists(dirname(__FILE__) . '/SSI.php') && !defined('SMF'))
     require_once(dirname(__FILE__) . '/SSI.php');
@@ -34,10 +10,7 @@ elseif (!defined('SMF'))
 // List settings here
 $oldSettings = array(
     'simplesef_enable',
-    'simplesef_simple',
     'simplesef_space',
-    'simplesef_suffix',
-    'simplesef_lowercase',
     'simplesef_strip_words',
     'simplesef_actions',
     'simplesef_useractions',
@@ -45,34 +18,34 @@ $oldSettings = array(
     'simplesef_ignore_actions',
     'simplesef_advanced',
     'simplesef_aliases',
-    'simplesef_debug',
+    'simplesef_debug'
 );
 
 $sef_functions = array(
-	'integrate_pre_include' => '$sourcedir/SimpleSEF.php',
-	'integrate_pre_load' => 'SimpleSEF::convertQueryString#',
-	'integrate_buffer' => 'SimpleSEF::ob_simplesef#',
-	'integrate_redirect' => 'SimpleSEF::fixRedirectUrl#',
-	'integrate_outgoing_email' => 'SimpleSEF::fixEmailOutput#',
-	'integrate_exit' => 'SimpleSEF::fixXMLOutput#',
-	'integrate_admin_areas' => 'SimpleSEF::adminAreas#',
-	'integrate_menu_buttons' => 'SimpleSEF::menuButtons#',
-	'integrate_actions' => 'SimpleSEF::actionArray#',
+    'integrate_pre_include'    => '$sourcedir/SimpleSEF.php',
+    'integrate_pre_load'       => 'SimpleSEF::convertQueryString#',
+    'integrate_buffer'         => 'SimpleSEF::ob_simplesef#',
+    'integrate_redirect'       => 'SimpleSEF::fixRedirectUrl#',
+    'integrate_outgoing_email' => 'SimpleSEF::fixEmailOutput#',
+    'integrate_exit'           => 'SimpleSEF::fixXMLOutput#',
+    'integrate_admin_areas'    => 'SimpleSEF::adminAreas#',
+    'integrate_admin_search'   => 'SimpleSEF::adminSearch#',
+    'integrate_menu_buttons'   => 'SimpleSEF::menuButtons#',
+    'integrate_actions'        => 'SimpleSEF::actionArray#'
 );
 
 if (!empty($smcFunc['db_query'])) {
     $smcFunc['db_query']('', '
-		DELETE FROM {db_prefix}settings
-		WHERE variable IN ({array_string:settings})', array(
-        'settings' => $oldSettings,
+        DELETE FROM {db_prefix}settings
+        WHERE variable IN ({array_string:settings})', array(
+            'settings' => $oldSettings
         )
     );
 
     // Remove hooks (for 2.0)
     foreach ($sef_functions as $hook => $function)
         remove_integration_function($hook, $function);
-}
-else
+} else
     db_query("DELETE FROM {$db_prefix}settings WHERE variable IN ('" . implode('\', \'', array_merge($oldSettings, array_keys($sef_functions))) . "')", __FILE__, __LINE__);
 
 if (removeHtaccess() === false)
@@ -83,7 +56,8 @@ if (SMF == 'SSI') {
     @unlink(__FILE__);
 }
 
-function removeHtaccess() {
+function removeHtaccess()
+{
     global $boarddir;
 
     $htaccess_removal = '
@@ -106,14 +80,12 @@ RewriteRule ^(.*)$ index.php?q=$1 [L,QSA]';
                 fwrite($ht_handle, $new_htaccess);
                 fclose($ht_handle);
                 return true;
-            }
-            else
+            } else
                 return false;
         }
         else
             return true;
-    }
-    elseif (file_exists($boarddir . '/.htaccess'))
+    } elseif (file_exists($boarddir . '/.htaccess'))
         return strpos(file_get_contents($boarddir . '/.htaccess'), 'RewriteRule ^(.*)$ index.php') === false;
     else
         return true;

@@ -1024,16 +1024,20 @@ class SimpleSEF
 		}
 
 		if (!empty($url_parts)) {
-			if (isset($url_parts[1]) && strpos('sa.', $url_parts[1] === false)) {
-				$current_value = array_pop($url_parts);
+			if (isset($url_parts[1])) {
+				if (substr($url_parts[1], 0, 3) === 'sa.') {
+					$current_value = array_pop($url_parts);
+					array_push($url_parts, $current_value);
+				} else {
+					$current_value = array_pop($url_parts);
+					// get the topic id
+					$topic = $current_value;
+					$topic = substr($topic, strrpos($topic, $modSettings['simplesef_space']) + 1);
+					$querystring['topic'] = $topic;
+					array_pop($url_parts);
+				}
 
-				// get the topic id
-				$topic = $current_value;
-				$topic = substr($topic, strrpos($topic, $modSettings['simplesef_space']) + 1);
-				$querystring['topic'] = $topic;
 
-				// remove the board name too
-				array_pop($url_parts);
 			} else {
 				$current_value = array_pop($url_parts);
 

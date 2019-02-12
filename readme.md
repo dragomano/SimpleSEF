@@ -21,16 +21,15 @@ yourboard.com/index.php?action=profile =>> yourboard.com/profile[/nobbc]
 
 ###### Features:
 
-- Makes no core code changes to SMF **AT ALL**
-- Works with Apache (mod_rewrite required) or IIS7 (Microsoft URL Rewrite module required + web.config files in your directory)
-- Custom action handling for other mods
+- Makes no core code changes to SMF **AT ALL**.
+- Works with Apache (mod_rewrite required) or IIS7 (Microsoft URL Rewrite module required + web.config files in your directory).
+- Custom action handling for other mods.
 - Action ignoring- Prevent urls with certain actions from being rewritten.
 - Action aliasing- change 'register' to 'signup' for example.
-- Very low overhead to each page load- Average database query count per page load- 2 (with caching enabled, 3 without)
-- 'Simple' mode, puts just the words 'board', 'topic' or 'user' into the url, instead of content filled urls
+- Very low overhead to each page load- Average database query count per page load- 2 (with caching enabled, 3 without).
 - Removes user specified words and characters from board and topic and usernames (thinks like ! $ &, etc, and short words, like 'the', 'at', 'and', etc.  These are customizable in the admin panel.
-- Smart- when you add mods with new actions to your board, SimpleSEF readily recognizes the new ones and accounts for them without any interaction from you
-- Specify the 'space' character in the URL (ie: general_discussion, general-discussion, general.discussion, etc)
+- Smart- when you add mods with new actions to your board, SimpleSEF readily recognizes the new ones and accounts for them without any interaction from you.
+- Specify the 'space' character in the URL (ie: general_discussion, general-discussion, general.discussion, etc).
 - UTF-8 compatible, changes non-ASCII characters to their closes US-ASCII equivilant.
 
 Post-Install Notes:
@@ -39,6 +38,15 @@ Please ensure your .htaccess or web.config file contains the proper information 
 ###### Changelog:
 
 ```
+v 2.2
++ Added support for SMF 2.1 RC1.
+! Fix support for extensions.
+! Fix template for SMF 2.1 RC1.
+! Small refactoring.
+! Fixed some errors.
+- Removed some options.
+- Removed readme.txt
+
 v 2.1.1
 ! Fix error with fixHooks.
 ! Prevent testing strings that are too short.

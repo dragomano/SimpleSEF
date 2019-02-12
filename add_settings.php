@@ -1,47 +1,23 @@
 <?php
 
-/* * **** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is http://code.mattzuba.com code.
- *
- * The Initial Developer of the Original Code is
- * Matt Zuba.
- * Portions created by the Initial Developer are Copyright (C) 2010-2011
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *
- * ***** END LICENSE BLOCK ***** */
-
 // If SSI.php is in the same place as this file, and SMF isn't defined, this is being run standalone.
 if (!defined('SMF') && file_exists(dirname(__FILE__) . '/SSI.php'))
-    require_once(dirname(__FILE__) . '/SSI.php');
+	require_once(dirname(__FILE__) . '/SSI.php');
 // Hmm... no SSI.php and no SMF?
 elseif (!defined('SMF'))
-    die('<b>Error:</b> Cannot install - please verify you put this in the same place as SMF\'s index.php.');
+	die('<b>Error:</b> Cannot install - please verify you put this in the same place as SMF\'s index.php.');
 
 pre_install_check();
 
 // List settings here in the format: setting_key => default_value.  Escape any "s. (" => \")
 $newSettings = array(
-	'simplesef_space' => '_',
-	'simplesef_suffix' => 'html',
-	'simplesef_lowercase' => '1',
-	'simplesef_strip_words' => 'a,about,above,across,after,along,around,at,before,behind,below,beneath,beside,between,but,by,down,during,except,for,from,in,inside,into,like,near,of,off,on,onto,out,outside,over,since,through,the,till,to,toward,under,until,up,upon,with,within,without',
+	'simplesef_space'          => '_',
+	'simplesef_suffix'         => 'html',
+	'simplesef_lowercase'      => '1',
+	'simplesef_strip_words'    => 'a,about,above,across,after,along,around,at,before,behind,below,beneath,beside,between,but,by,down,during,except,for,from,in,inside,into,like,near,of,off,on,onto,out,outside,over,since,through,the,till,to,toward,under,until,up,upon,with,within,without',
 	'simplesef_ignore_actions' => 'dlattach,.xml,xmlhttp,viewsmfile,breezeajax,breezemood,breezecover',
-	'simplesef_actions' => 'activate,admin,announce,attachapprove,buddy,calendar,clock,coppa,credits,deletemsg,dlattach,editpoll,editpoll2,findmember,groups,help,helpadmin,jsmodify,jsoption,likes,loadeditorlocale,lock,lockvoting,login,login2,logintfa,logout,markasread,mergetopics,mlist,moderate,modifycat,movetopic,movetopic2,notify,notifyboard,notifytopic,pm,post,post2,printpage,profile,quotefast,quickmod,quickmod2,recent,reminder,removepoll,removetopic2,reporttm,requestmembers,restoretopic,search,search2,sendactivation,signup,signup2,smstats,suggest,spellcheck,splittopics,stats,sticky,theme,trackip,about:unknown,unread,unreadreplies,verificationcode,viewprofile,vote,viewquery,viewsmfile,who,.xml,xmlhttp',
-	'simplesef_useractions' => 'profile',
+	'simplesef_actions'        => 'activate,admin,announce,attachapprove,buddy,calendar,clock,coppa,credits,deletemsg,dlattach,editpoll,editpoll2,findmember,groups,help,helpadmin,jsmodify,jsoption,likes,loadeditorlocale,lock,lockvoting,login,login2,logintfa,logout,markasread,mergetopics,mlist,moderate,modifycat,movetopic,movetopic2,notify,notifyboard,notifytopic,pm,post,post2,printpage,profile,quotefast,quickmod,quickmod2,recent,reminder,removepoll,removetopic2,reporttm,requestmembers,restoretopic,search,search2,sendactivation,signup,signup2,smstats,suggest,spellcheck,splittopics,stats,sticky,theme,trackip,about:unknown,unread,unreadreplies,verificationcode,viewprofile,vote,viewquery,viewsmfile,who,.xml,xmlhttp',
+	'simplesef_useractions'    => 'profile'
 );
 
 $newSettings['simplesef_strip_chars'] = empty($smcFunc['db_query']) ? '&quot,&amp,&lt,&gt,`,~,!,@,#,$,%,^,&,*,(,),-,_,=,+,[,{,],},;,:,\\\',",",/,?,\\\,|' : '&quot,&amp,&lt,&gt,`,~,!,@,#,$,%,^,&,*,(,),-,_,=,+,[,{,],},;,:,\',",",/,?,\,|';
@@ -51,15 +27,16 @@ updateSettings($newSettings);
 // Add hooks (for 2.0)
 if (!empty($smcFunc['db_query'])) {
 	$sef_functions = array(
-		'integrate_pre_include' => '$sourcedir/SimpleSEF.php',
-		'integrate_pre_load' => 'SimpleSEF::convertQueryString#',
-		'integrate_buffer' => 'SimpleSEF::ob_simplesef#',
-		'integrate_redirect' => 'SimpleSEF::fixRedirectUrl#',
+		'integrate_pre_include'    => '$sourcedir/SimpleSEF.php',
+		'integrate_pre_load'       => 'SimpleSEF::convertQueryString#',
+		'integrate_buffer'         => 'SimpleSEF::ob_simplesef#',
+		'integrate_redirect'       => 'SimpleSEF::fixRedirectUrl#',
 		'integrate_outgoing_email' => 'SimpleSEF::fixEmailOutput#',
-		'integrate_exit' => 'SimpleSEF::fixXMLOutput#',
-		'integrate_admin_areas' => 'SimpleSEF::adminAreas#',
-		'integrate_menu_buttons' => 'SimpleSEF::menuButtons#',
-		'integrate_actions' => 'SimpleSEF::actionArray#',
+		'integrate_exit'           => 'SimpleSEF::fixXMLOutput#',
+		'integrate_admin_areas'    => 'SimpleSEF::adminAreas#',
+		'integrate_admin_search'   => 'SimpleSEF::adminSearch#',
+		'integrate_menu_buttons'   => 'SimpleSEF::menuButtons#',
+		'integrate_actions'        => 'SimpleSEF::actionArray#'
 	);
 
 	foreach ($sef_functions as $hook => $function)
@@ -69,13 +46,12 @@ if (!empty($smcFunc['db_query'])) {
 if (addHtaccess() === false)
 	log_error('Could not add or edit .htaccess file upon install of SimpleSEF', 'debug');
 
-if (SMF == 'SSI') 
-{
+if (SMF == 'SSI') {
 	fatal_error('<b>This isn\'t really an error, just a message telling you that the settings have been entered into the database!</b><br />');
 	@unlink(__FILE__);
 }
 
-function pre_install_check() 
+function pre_install_check()
 {
 	global $modSettings, $txt;
 
@@ -84,7 +60,7 @@ function pre_install_check()
 		fatal_error('<b>You are currently using the ' . $char_set . ' character set and your server does not have functions available to convert to UTF-8.  In order to use this mod, you will either need to convert your board to UTF-8 or ask your host to recompile PHP with with the Iconv or Multibyte String extensions.</b>');
 }
 
-function addHtaccess() 
+function addHtaccess()
 {
 	global $boarddir;
 
@@ -105,24 +81,19 @@ RewriteRule ^(.*)$ index.php?q=$1 [L,QSA]';
 				fwrite($ht_handle, $htaccess_addition);
 				fclose($ht_handle);
 				return true;
-			}
-			else
+			} else
 				return false;
-		}
-		else
+		} else
 			return true;
-	}
-	elseif (file_exists($boarddir . '/.htaccess'))
+	} elseif (file_exists($boarddir . '/.htaccess'))
 		return strpos(file_get_contents($boarddir . '/.htaccess'), 'RewriteRule ^(.*)$ index.php') !== false;
 	elseif (is_writable($boarddir)) {
 		if (($ht_handle = fopen($boarddir . '/.htaccess', 'wb'))) {
 			fwrite($ht_handle, trim($htaccess_addition));
 			fclose($ht_handle);
 			return true;
-		}
-		else
+		} else
 			return false;
-	}
-	else
+	} else
 		return false;
 }

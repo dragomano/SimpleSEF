@@ -8,7 +8,7 @@ The software is licensed under [MPL 1.1 license](https://www.mozilla.org/en-US/M
 
 This mod creates content filled URLs for your forum.
 
-**For SMF 2.1.x only**
+**For SMF 2.1.x and PHP 7.2+ only**
 
 Examples:
 
@@ -38,6 +38,9 @@ Please ensure your .htaccess or web.config file contains the proper information 
 ###### Changelog:
 
 ```
+v 2.2.1
++ Added support for SMF 2.1 RC2-RC3
+
 v 2.2
 + Added support for SMF 2.1 RC1.
 ! Fix support for extensions.

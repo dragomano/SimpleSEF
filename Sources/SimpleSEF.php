@@ -926,7 +926,7 @@ class SimpleSEF
 
 		$data = explode('.', $id);
 		$value = $data[0];
-		$start = $data[1] ?? 0;
+		$start = $data[1] ?: 0;
 
 		// If the topic id isn't here (probably from a redirect) we need a query to get it
 		if (empty($this->topicNames[$value]))

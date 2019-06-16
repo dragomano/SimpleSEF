@@ -3,10 +3,10 @@
 <package-info xmlns="http://www.simplemachines.org/xml/package-info" xmlns:smf="http://www.simplemachines.org/">
 	<id>slammeddime:simplesef</id>
 	<name>SimpleSEF</name>
-	<version>2.2</version>
+	<version>2.2.1</version>
 	<type>modification</type>
 
-	<install for="2.1 RC1, 2.1 - 2.1.99">
+	<install for="2.1 RC1, 2.1 RC2, 2.1 RC3, 2.1 - 2.1.99">
 		<license type="inline" parsebbc="false">
 This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 1.1. If a copy of the MPL was not distributed with this
@@ -22,7 +22,7 @@ file, You can obtain one at https://www.mozilla.org/en-US/MPL/1.1/
 		<redirect type="inline" url="?action=admin;area=simplesef;sa=basic" timeout="1000">Thank you for installing SimpleSEF, you will now be redirected to the settings page.</redirect>
 	</install>
 
-	<uninstall for="2.1 RC1, 2.1 - 2.1.99">
+	<uninstall for="2.1 RC1, 2.1 RC2, 2.1 RC3, 2.1 - 2.1.99">
 		<code>remove_settings.php</code>
 		<remove-file name="$languagedir/SimpleSEF.english.php" />
 		<remove-file name="$themedir/SimpleSEF.template.php" />

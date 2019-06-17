@@ -3,26 +3,24 @@
 $txt['simplesef'] = 'SimpleSEF';
 $txt['simplesef_desc'] = 'This section allows you to edit the options for SimpleSEF.<br><br>
 <strong>Note: If you enable this and start receiving 404 errors on your board, it is likely because .htaccess or web.config was not created, or your host does not have the mod_rewrite or Microsoft Url Rewrite module installed on the web server and you will not be able to use this mod.</strong> [<a href="#" onclick="showSimpleSEFHelp(); return false;">Help</a>]
-<span style="display:block;" id="simplesef_help">If you have an Apache webserver, or one that uses .htaccess and has mod_rewrite functionality, you need a .htaccess file in your main SMF directory with the following:
-<span style="display:block;" class="codeheader">Code:</span>
-<code>RewriteEngine On<br># Uncomment the following line if its not working right<br># RewriteBase /<br>RewriteCond %{REQUEST_FILENAME} !-f<br>RewriteCond %{REQUEST_FILENAME} !-d<br>RewriteRule ^(.*)$ index.php?q=$1 [L,QSA]</code>
+<div style="display:block;" id="simplesef_help">If you have an Apache webserver, or one that uses .htaccess and has mod_rewrite functionality, you need a .htaccess file in your main SMF directory with the following:' .
+parse_bbc('[code]RewriteEngine On<br># Uncomment the following line if its not working right<br># RewriteBase /<br>RewriteCond %{REQUEST_FILENAME} !-f<br>RewriteCond %{REQUEST_FILENAME} !-d<br>RewriteRule ^(.*)$ index.php?q=$1 [L,QSA][/code]') . '
 <br>
-If you have a IIS7 webserver, you need a web.config file in your main SMF directory with the following:
-<span style="display:block;" class="codeheader">Code:</span>
-<code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;<br>&lt;configuration&gt;<br>    &lt;system.webServer&gt;<br>        &lt;rewrite&gt;<br>            &lt;rules&gt;<br>                &lt;rule name=&quot;SimpleSEF&quot; stopProcessing=&quot;true&quot;&gt;<br>                    &lt;match url=&quot;^(.*)$&quot; ignoreCase=&quot;false&quot; /&gt;<br>                    &lt;conditions logicalGrouping=&quot;MatchAll&quot;&gt;<br>                        &lt;add input=&quot;{REQUEST_FILENAME}&quot; matchType=&quot;IsFile&quot; negate=&quot;true&quot; pattern=&quot;&quot; ignoreCase=&quot;false&quot; /&gt;<br>                        &lt;add input=&quot;{REQUEST_FILENAME}&quot; matchType=&quot;IsDirectory&quot; negate=&quot;true&quot; pattern=&quot;&quot; ignoreCase=&quot;false&quot; /&gt;<br>                    &lt;/conditions&gt;<br>                    &lt;action type=&quot;Rewrite&quot; url=&quot;index.php?q={R:1}&quot; appendQueryString=&quot;true&quot; /&gt;<br>                &lt;/rule&gt;<br>            &lt;/rules&gt;<br>        &lt;/rewrite&gt;<br>    &lt;/system.webServer&gt;<br>&lt;/configuration&gt;</code>
+If you have a IIS7 webserver, you need a web.config file in your main SMF directory with the following:' .
+parse_bbc('[code]&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;<br>&lt;configuration&gt;<br>    &lt;system.webServer&gt;<br>        &lt;rewrite&gt;<br>            &lt;rules&gt;<br>                &lt;rule name=&quot;SimpleSEF&quot; stopProcessing=&quot;true&quot;&gt;<br>                    &lt;match url=&quot;^(.*)$&quot; ignoreCase=&quot;false&quot; /&gt;<br>                    &lt;conditions logicalGrouping=&quot;MatchAll&quot;&gt;<br>                        &lt;add input=&quot;{REQUEST_FILENAME}&quot; matchType=&quot;IsFile&quot; negate=&quot;true&quot; pattern=&quot;&quot; ignoreCase=&quot;false&quot; /&gt;<br>                        &lt;add input=&quot;{REQUEST_FILENAME}&quot; matchType=&quot;IsDirectory&quot; negate=&quot;true&quot; pattern=&quot;&quot; ignoreCase=&quot;false&quot; /&gt;<br>                    &lt;/conditions&gt;<br>                    &lt;action type=&quot;Rewrite&quot; url=&quot;index.php?q={R:1}&quot; appendQueryString=&quot;true&quot; /&gt;<br>                &lt;/rule&gt;<br>            &lt;/rules&gt;<br>        &lt;/rewrite&gt;<br>    &lt;/system.webServer&gt;<br>&lt;/configuration&gt;[/code]') . '
 <br>
-If you have Lighttpd v1.4.23 or less, you will need the following in your Lighttpd config file, normally at /etc/lighttpd/lighttpd.conf (thanks to <a href="https://www.simplemachines.org/community/index.php?action=profile;u=9547">Daniel15</a>).
-<code>$HTTP[&quot;host&quot;] =~ &quot;(www.)?example.com&quot; {<br>   url.rewrite-final += (<br>      # Allow all normal files<br>      &quot;^/forum/.*\.(js|ico|gif|jpg|png|swf|css|htm|php)(\?.*)?$&quot; =&gt; &quot;$0&quot;,<br>      # Rewrite everything else<br>      &quot;^/([^.?]*)$&quot; =&gt; &quot;/index.php?q=$1&quot;<br>   )<br>}</code>
+If you have Lighttpd v1.4.23 or less, you will need the following in your Lighttpd config file, normally at /etc/lighttpd/lighttpd.conf (thanks to <a href="https://www.simplemachines.org/community/index.php?action=profile;u=9547">Daniel15</a>).' .
+parse_bbc('[code]$HTTP[&quot;host&quot;] =~ &quot;(www.)?example.com&quot; {<br>   url.rewrite-final += (<br>      # Allow all normal files<br>      &quot;^/forum/.*\.(js|ico|gif|jpg|png|swf|css|htm|php)(\?.*)?$&quot; =&gt; &quot;$0&quot;,<br>      # Rewrite everything else<br>      &quot;^/([^.?]*)$&quot; =&gt; &quot;/index.php?q=$1&quot;<br>   )<br>}[/code]') . '
 <br>
-You can also make this work with Nginx with the following code added to your Nginx configuration file.
-<code>if (!-e $request_filename) {<br>    rewrite ^/(.*)$ /index.php?q=$1 last;<br>}</code>
-</span>
-<script><!-- // --><!' . '[CDATA[
-document.getElementById("simplesef_help").style.display = "none";
-function showSimpleSEFHelp() {
-	document.getElementById("simplesef_help").style.display = "block";
-}
-// ]]' . '></script>';
+You can also make this work with Nginx with the following code added to your Nginx configuration file.' .
+parse_bbc('[code]if (!-e $request_filename) {<br>    rewrite ^/(.*)$ /index.php?q=$1 last;<br>}[/code]') . '
+</div>
+<script>
+	document.getElementById("simplesef_help").style.display = "none";
+	function showSimpleSEFHelp() {
+		document.getElementById("simplesef_help").style.display = (document.getElementById("simplesef_help").style.display == "none") ? "" : "none";
+	}
+</script>';
 $txt['simplesef_basic']            = 'Basic Options';
 $txt['simplesef_enable']           = 'Enable SimpleSEF';
 $txt['simplesef_enable_desc']      = 'Requires mod_rewrite support or Url Rewrite/web.config (IIS7) support.';

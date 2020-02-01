@@ -1,12 +1,10 @@
 # SimpleSEF
 ![SMF 2.1](https://img.shields.io/badge/SMF-2.1-ed6033.svg?style=flat)
-![License](https://img.shields.io/github/license/dragomano/simplesef)
 ![PHP](https://img.shields.io/badge/PHP-^7.2-blue.svg?style=flat)
-![Downloads](https://img.shields.io/github/downloads/dragomano/simplesef/total)
 
 * **Original authors:** [Mattzuba](https://bitbucket.org/mattzuba/simplesef), [Suki](https://github.com/MissAllSunday/SimpleSEF)
 * **Author:** Bugo [dragomano.ru](https://dragomano.ru/translations/simplesef)
-* **License:** [MPL 1.1 license](https://github.com/dragomano/SimpleSEF/blob/master/LICENSE)
+* **License:** [MPL 1.1 license](https://www.mozilla.org/en-US/MPL/1.1/)
 * **Compatible with:** SMF 2.1.x / PHP 7.2+
 * **Tested on:** PHP 7.3.14 / MariaDB 10.3.13 / PostgreSQL 9.6.16
 * **Hooks only:** Yes

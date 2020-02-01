@@ -34,7 +34,7 @@ $txt['simplesef_action_title']     = 'Actions and User Actions';
 $txt['simplesef_action_desc']      = 'These are all of the actions of the board. You normally do not need to edit this list. Infact, if you do edit these lists, it can cause parts of your board not to function temporarily. These are only provided to be edited if you are directed to do so. [<a href="#" onclick="return editAreas();">Edit</a>]';
 $txt['simplesef_actions']          = 'Actions';
 $txt['simplesef_useractions']      = 'User Actions';
-$txt['simplesef_adds']             = '<a href="http://code.mattzuba.com/simplesef">SimpleSEF</a> added';
+$txt['simplesef_adds']             = '<a href="http://code.mattzuba.com/simplesef" target="_blank" rel="nofollow noopener">SimpleSEF</a> added';
 $txt['simplesef_404']              = 'The page you requested could not be found. Please contact the site administrator if you believe you have reached this page in error.';
 $txt['simplesef_advanced']         = 'Advanced Options';
 $txt['simplesef_advanced_desc']    = 'Enable action aliasing, action ignoring and other advanced options.';

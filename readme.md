@@ -2,7 +2,7 @@
 ![SMF 2.1](https://img.shields.io/badge/SMF-2.1-ed6033.svg?style=flat)
 ![PHP](https://img.shields.io/badge/PHP-^7.2-blue.svg?style=flat)
 
-* **Original authors:** [Mattzuba](https://bitbucket.org/mattzuba/simplesef), [Suki](https://github.com/MissAllSunday/SimpleSEF)
+* **Original authors:** [Matt Zuba](https://bitbucket.org/mattzuba/simplesef), [Suki](https://github.com/MissAllSunday/SimpleSEF)
 * **Author:** Bugo [dragomano.ru](https://dragomano.ru/translations/simplesef)
 * **License:** [MPL 1.1 license](https://www.mozilla.org/en-US/MPL/1.1/)
 * **Compatible with:** SMF 2.1.x / PHP 7.2+
@@ -40,5 +40,5 @@ Please ensure your .htaccess or web.config file contains the proper information 
 * Добавлена русская локализация.
 * Адаптация для SMF 2.1.x.
 * Исправлены некоторые ошибки оригинального мода.
-* Удалены ненужные настройки (удаление лишних символов, перевод в нижний регистр, окончания URL-адресов и т. п.) и функции.
+* Удалены ненужные настройки и функции.
 * Интегрирован [Behat Transliterator](https://github.com/Behat/Transliterator).

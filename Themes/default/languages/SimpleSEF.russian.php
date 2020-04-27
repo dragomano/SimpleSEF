@@ -3,7 +3,7 @@
 $txt['simplesef'] = 'SimpleSEF';
 $txt['simplesef_desc'] = 'В этом разделе можно изменить параметры SimpleSEF.<br><br>
 <strong>Примечание: если после включения мода начали возникать ошибки 404 (страница не существует), это обычно связано с отсутствием файлов .htaccess или web.config. Либо на вашем сервере отключены или не установлены mod_rewrite или модуль Microsoft Url Rewrite (в зависимости от типа сервера). В этом случае использование мода будет невозможно.</strong> [<a href="#" onclick="showSimpleSEFHelp(); return false;">Справка</a>]
-<div style="display:block;" id="simplesef_help"><br>При использовании сервера Apache вам необходим файл .htaccess в корневой директории SMF, со следующим содержимым:' .
+<div id="simplesef_help"><br>При использовании сервера Apache вам необходим файл .htaccess в корневой директории SMF, со следующим содержимым:' .
 parse_bbc('[code]RewriteEngine On<br># Uncomment the following line if its not working right<br># RewriteBase /<br>RewriteCond %{REQUEST_FILENAME} !-f<br>RewriteCond %{REQUEST_FILENAME} !-d<br>RewriteRule ^(.*)$ index.php?q=$1 [L,QSA][/code]') . '
 <br>
 При использовании сервера IIS7 убедитесь в наличии файла web.config в корневой директории SMF, со следующим содержимым:' .
@@ -21,36 +21,25 @@ parse_bbc('[code]if (!-e $request_filename) {<br>    rewrite ^/(.*)$ /index.php?
 		document.getElementById("simplesef_help").style.display = (document.getElementById("simplesef_help").style.display == "none") ? "" : "none";
 	}
 </script>';
-$txt['simplesef_basic'] = 'Основные настройки';
-$txt['simplesef_enable'] = 'Включить SimpleSEF';
-$txt['simplesef_enable_desc'] = 'Требуется поддержка mod_rewrite (Apache) или web.config (IIS7).';
-$txt['simplesef_simple'] = 'Создавать простые url';
-$txt['simplesef_simple_desc'] = 'Адреса будут выглядеть как /forum/board-1/ или /forum/topic-3.html.';
-$txt['simplesef_space'] = 'Пробел';
-$txt['simplesef_space_desc'] = 'Символ, используемый вместо пробела в адресах. Обычно _ (знак подчеркивания) или - (дефис).';
-$txt['simplesef_suffix'] = 'Окончание url в темах и сообщениях';
-$txt['simplesef_suffix_desc'] = 'Расширение адресов для использования в темах (например: html, php).';
-$txt['simplesef_suffix_required'] = 'Использование расширения обязательно!';
-$txt['simplesef_strip_words'] = 'Слова, удаляемые из адресов';
-$txt['simplesef_strip_words_desc'] = 'Эти слова будут вырезаться из url. В результате будут создаваться короткие, но всё ещё читаемые url. Для указания нескольких слов используйте запятую (без пробелов).';
-$txt['simplesef_strip_chars'] = 'Символы, удаляемые из адресов';
-$txt['simplesef_strip_chars_desc'] = 'Эти символы будут вырезаться из url. В результате будут создаваться короткие, но всё ещё читаемые url. Для указания нескольких символов используйте запятую (без пробелов).';
-$txt['simplesef_lowercase'] = 'URL-адреса в нижнем регистре';
-$txt['simplesef_lowercase_desc'] = 'Конвертация всех url в нижний регистр.';
-$txt['simplesef_action_title'] = 'Области (Actions)';
-$txt['simplesef_action_desc'] = 'Здесь перечислены все области форума. Обычно вам не нужно ничего изменять в этом списке. Но если вы всё-таки решитесь на это, будьте готовы к тому, что что-нибудь перестанет работать. [<a href="#" onclick="return editAreas();">Правка</a>]';
-$txt['simplesef_actions'] = 'Стандартные';
-$txt['simplesef_useractions'] = 'Пользовательские';
-$txt['simplesef_adds'] = 'Добавлено <!--noindex--><a href="http://code.mattzuba.com/simplesef" target="_blank" rel="nofollow noopener">SimpleSEF</a><!--/noindex-->:';
-$txt['simplesef_404'] = 'Запрашиваемая страница не найдена. Пожалуйста, свяжитесь с администратором форума, если считаете, что попали на эту страницу по ошибке.';
-$txt['simplesef_advanced'] = 'Дополнительно';
-$txt['simplesef_advanced_desc'] = 'Разрешить использование псевдонимов, игнорирование некоторых областей и некоторые другие параметры.';
-$txt['simplesef_alias'] = 'Псевдонимы';
-$txt['simplesef_alias_desc'] = 'Использование псевдонимов помогает изменять имена любых областей (actions), без влияния на работу форума. Например, action страницы &laquo;Список пользователей&raquo; \'mlist\' можно без проблем поменять на \'users\'. У каждой области форума может быть только <strong>один</strong> псевдоним.';
-$txt['simplesef_alias_clickadd'] = 'Добавить псевдоним';
-$txt['simplesef_alias_detail'] = 'Укажите желаемую область слева, а справа — её псевдоним';
-$txt['simplesef_ignore'] = 'Игнорируемые области';
-$txt['simplesef_ignore_desc'] = 'Переместите области, которые вам не нужны, в список справа.';
-$txt['simplesef_debug'] = 'Режим отладки';
-$txt['simplesef_debug_desc'] = 'Никакой дополнительной информации выводиться не будет, но в логе ошибок появятся специфические отчёты SimpleSEF. Функция может пригодиться в случае, если автор мода попросит предоставить полные сообщения об ошибках.';
-$txt['simplesef__created_full'] = 'SimpleSEF добавил %1$.3f сек. Запросов: %2$d.';
+$txt['simplesef_basic']            = 'Основные настройки';
+$txt['simplesef_enable']           = 'Включить SimpleSEF';
+$txt['simplesef_enable_desc']      = 'Требуется поддержка mod_rewrite (Apache) или web.config (IIS7).';
+$txt['simplesef_space']            = 'Заменитель пробела';
+$txt['simplesef_space_desc']       = 'Символ, используемый вместо пробела в адресах. Обычно _ (знак подчеркивания) или - (дефис).';
+$txt['simplesef_strip_words']      = 'Слова, удаляемые из адресов';
+$txt['simplesef_strip_words_desc'] = 'Эти слова будут вырезаться из URL-адресов. В результате будут создаваться короткие, но всё ещё читаемые URL-адреса. Для указания нескольких слов используйте запятую (без пробелов).';
+$txt['simplesef_strip_chars']      = 'Символы, удаляемые из адресов';
+$txt['simplesef_strip_chars_desc'] = 'Эти символы будут вырезаться из URL-адресов. В результате будут создаваться короткие, но всё ещё читаемые URL-адреса. Для указания нескольких символов используйте запятую (без пробелов).';
+$txt['simplesef_action_title']     = 'Области (Actions)';
+$txt['simplesef_action_desc']      = 'Здесь перечислены все области форума. Обычно вам не нужно ничего изменять в этом списке. Но если вы всё-таки решитесь на это, будьте готовы к тому, что что-нибудь перестанет работать. [<a href="#" onclick="return editAreas();">Правка</a>]';
+$txt['simplesef_actions']          = 'Стандартные';
+$txt['simplesef_useractions']      = 'Пользовательские';
+$txt['simplesef_404']              = 'Запрашиваемая страница не найдена. Пожалуйста, свяжитесь с администратором форума, если считаете, что попали на эту страницу по ошибке.';
+$txt['simplesef_advanced']         = 'Дополнительно';
+$txt['simplesef_advanced_desc']    = 'Разрешить использование псевдонимов, игнорирование некоторых областей и некоторые другие параметры.';
+$txt['simplesef_alias']            = 'Псевдонимы';
+$txt['simplesef_alias_desc']       = 'Использование псевдонимов помогает изменять имена любых областей (actions), без влияния на работу форума. Например, action страницы &laquo;Список пользователей&raquo; \'mlist\' можно без проблем поменять на \'users\'. У каждой области форума может быть только <strong>один</strong> псевдоним.';
+$txt['simplesef_alias_clickadd']   = 'Добавить псевдоним';
+$txt['simplesef_alias_detail']     = 'Укажите желаемую область слева, а справа — её псевдоним';
+$txt['simplesef_ignore']           = 'Игнорируемые области';
+$txt['simplesef_ignore_desc']      = 'Переместите области, которые вам не нужны, в список справа.';

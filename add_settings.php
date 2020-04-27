@@ -1,26 +1,20 @@
 <?php
 
-// If SSI.php is in the same place as this file, and SMF isn't defined, this is being run standalone.
-if (!defined('SMF') && file_exists(dirname(__FILE__) . '/SSI.php'))
+if (file_exists(dirname(__FILE__) . '/SSI.php') && !defined('SMF'))
 	require_once(dirname(__FILE__) . '/SSI.php');
-// Hmm... no SSI.php and no SMF?
-elseif (!defined('SMF'))
-	die('<b>Error:</b> Cannot install - please verify you put this in the same place as SMF\'s index.php.');
+elseif(!defined('SMF'))
+	die('<b>Error:</b> Cannot install - please verify that you put this file in the same place as SMF\'s index.php and SSI.php files.');
 
-pre_install_check();
+if (version_compare(PHP_VERSION, '7.2', '<'))
+	die('This mod needs PHP 7.2 or greater. You will not be able to install/use this mod, contact your host and ask for a php upgrade.');
 
 // List settings here in the format: setting_key => default_value.  Escape any "s. (" => \")
 $newSettings = array(
 	'simplesef_space'          => '_',
-	'simplesef_suffix'         => 'html',
-	'simplesef_lowercase'      => '1',
-	'simplesef_strip_words'    => 'a,about,above,across,after,along,around,at,before,behind,below,beneath,beside,between,but,by,down,during,except,for,from,in,inside,into,like,near,of,off,on,onto,out,outside,over,since,through,the,till,to,toward,under,until,up,upon,with,within,without',
 	'simplesef_ignore_actions' => 'dlattach,.xml,xmlhttp,viewsmfile,breezeajax,breezemood,breezecover',
 	'simplesef_actions'        => 'activate,admin,announce,attachapprove,buddy,calendar,clock,coppa,credits,deletemsg,dlattach,editpoll,editpoll2,findmember,groups,help,helpadmin,jsmodify,jsoption,likes,loadeditorlocale,lock,lockvoting,login,login2,logintfa,logout,markasread,mergetopics,mlist,moderate,modifycat,movetopic,movetopic2,notify,notifyboard,notifytopic,pm,post,post2,printpage,profile,quotefast,quickmod,quickmod2,recent,reminder,removepoll,removetopic2,reporttm,requestmembers,restoretopic,search,search2,sendactivation,signup,signup2,smstats,suggest,spellcheck,splittopics,stats,sticky,theme,trackip,about:unknown,unread,unreadreplies,verificationcode,viewprofile,vote,viewquery,viewsmfile,who,.xml,xmlhttp',
 	'simplesef_useractions'    => 'profile'
 );
-
-$newSettings['simplesef_strip_chars'] = empty($smcFunc['db_query']) ? '&quot,&amp,&lt,&gt,`,~,!,@,#,$,%,^,&,*,(,),-,_,=,+,[,{,],},;,:,\\\',",",/,?,\\\,|' : '&quot,&amp,&lt,&gt,`,~,!,@,#,$,%,^,&,*,(,),-,_,=,+,[,{,],},;,:,\',",",/,?,\,|';
 
 updateSettings($newSettings);
 
@@ -49,15 +43,6 @@ if (addHtaccess() === false)
 if (SMF == 'SSI') {
 	fatal_error('<b>This isn\'t really an error, just a message telling you that the settings have been entered into the database!</b><br />');
 	@unlink(__FILE__);
-}
-
-function pre_install_check()
-{
-	global $modSettings, $txt;
-
-	$char_set = empty($modSettings['global_character_set']) ? $txt['lang_character_set'] : $modSettings['global_character_set'];
-	if ($char_set != 'ISO-8859-1' && $char_set != 'UTF-8' && !function_exists('iconv') && !function_exists('mb_convert_encoding') && !function_exists('unicode_decode'))
-		fatal_error('<b>You are currently using the ' . $char_set . ' character set and your server does not have functions available to convert to UTF-8.  In order to use this mod, you will either need to convert your board to UTF-8 or ask your host to recompile PHP with with the Iconv or Multibyte String extensions.</b>');
 }
 
 function addHtaccess()

@@ -41,7 +41,7 @@ class SimpleSEF
 	/**
 	 * @var array All ignored actions used in the forum
 	 */
-	protected $ignoreActions = ['admin', 'openidreturn', 'uploadAttach', '.xml', 'breezeajax', 'breezecover', 'breezemood', 'dlattach', 'viewsmfile', 'xmlhttp', 'sitemap'];
+	protected $ignoreActions = ['admin', 'moderate', 'openidreturn', 'uploadAttach', '.xml', 'breezeajax', 'breezecover', 'breezemood', 'dlattach', 'viewsmfile', 'xmlhttp', 'sitemap'];
 
 	/**
 	 * @var array Actions that have aliases
@@ -130,6 +130,9 @@ class SimpleSEF
 		if (empty($modSettings['simplesef_enable']) || (isset($_REQUEST['action']) && in_array($_REQUEST['action'], $this->ignoreActions)))
 			return;
 
+		if (isset($_REQUEST['xml']))
+			return;
+
 		$this->init();
 		$scripturl = $boardurl . '/index.php';
 
@@ -180,6 +183,9 @@ class SimpleSEF
 		if (empty($modSettings['simplesef_enable']) || (isset($_REQUEST['action']) && in_array($_REQUEST['action'], $this->ignoreActions)))
 			return $buffer;
 
+		if (isset($_REQUEST['xml']))
+			return $buffer;
+
 		// Bump up our memory limit a bit
 		if (@ini_get('memory_limit') < 128)
 			@ini_set('memory_limit', '128M');
@@ -200,7 +206,6 @@ class SimpleSEF
 
 		// Grab all URLs and fix them
 		$matches = [];
-		$count = 0;
 		preg_match_all('~\b(' . preg_quote($scripturl) . '[-a-zA-Z0-9+&@#/%?=\~_|!:,.;\[\]]*[-a-zA-Z0-9+&@#/%=\~_|\[\]]?)([^-a-zA-Z0-9+&@#/%=\~_|])~', $buffer, $matches);
 
 		if (!empty($matches[0])) {
@@ -213,7 +218,6 @@ class SimpleSEF
 			}
 
 			$buffer = str_replace(array_keys($replacements), array_values($replacements), $buffer);
-			$count = count($replacements);
 		}
 
 		// Gotta fix up some javascript laying around in the templates
@@ -229,11 +233,10 @@ class SimpleSEF
 
 		// Check to see if we need to update the actions lists
 		$changeArray = [];
-		$possibleChanges = ['actions', 'useractions'];
-
+		$possibleChanges = ['actions', 'userActions'];
 		foreach ($possibleChanges as $change)
-			if (empty($modSettings['simplesef_' . $change]) || (substr_count($modSettings['simplesef_' . $change], ',') + 1) != count($this->$change))
-				$changeArray['simplesef_' . $change] = implode(',', $this->$change);
+			if (empty($modSettings['simplesef_' . strtolower($change)]) || (substr_count($modSettings['simplesef_' . strtolower($change)], ',') + 1) != count($this->$change))
+				$changeArray['simplesef_' . strtolower($change)] = implode(',', $this->$change);
 
 		if (!empty($changeArray)) {
 			updateSettings($changeArray);
@@ -689,7 +692,7 @@ class SimpleSEF
 
 			foreach ($params as $key => $value) {
 				if ($value == '')
-					$sefstring3 .= $key . '.get/';
+					$sefstring3 .= $key . './';
 				else {
 					$sefstring2 .= $key;
 					if (is_array($value))

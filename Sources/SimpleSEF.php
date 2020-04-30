@@ -41,7 +41,7 @@ class SimpleSEF
 	/**
 	 * @var array All ignored actions used in the forum
 	 */
-	protected $ignoreActions = ['admin', 'moderate', 'openidreturn', 'uploadAttach', '.xml', 'breezeajax', 'breezecover', 'breezemood', 'dlattach', 'viewsmfile', 'xmlhttp', 'sitemap'];
+	protected $ignoreActions = ['admin', 'moderate', 'openidreturn', 'uploadAttach', '.xml', 'breezeajax', 'breezecover', 'breezemood', 'dlattach', 'viewsmfile', 'xmlhttp', 'sitemap', 'tpshout'];
 
 	/**
 	 * @var array Actions that have aliases
@@ -941,7 +941,7 @@ class SimpleSEF
 		}
 
 		if (!empty($url_parts)) {
-			if (isset($url_parts[1]) && strpos($url_parts[0], 'sa.') === false) {
+			if (isset($url_parts[1]) && strpos($url_parts[0], 'sa.') === false && strpos($url_parts[0], 'p.') === false) {
 				$current_value = array_pop($url_parts);
 				// Get the topic id
 				$topic = $current_value;

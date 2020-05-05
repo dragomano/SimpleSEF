@@ -6,7 +6,7 @@
 * **Author:** Bugo [dragomano.ru](https://dragomano.ru/translations/simplesef)
 * **License:** [MPL 1.1 license](https://www.mozilla.org/en-US/MPL/1.1/)
 * **Compatible with:** SMF 2.1.x / PHP 7.2+
-* **Tested on:** PHP 7.3.17 / MariaDB 10.4.12
+* **Tested on:** PHP 7.2.29 / MariaDB 10.4.12
 * **Hooks only:** Yes
 * **Languages:** English, Russian
 
@@ -16,10 +16,10 @@ This mod creates content filled URLs for your forum.
 ### Examples:
 
 ```
-yourboard.com/index.php =>> yourboard.com/
-yourboard.com/index.php?board=1.0 =>> yourboard.com/general-discussion/
-yourboard.com/index.php?topic=1.0 =>> yourboard.com/general-discussion/welcome-smf-1.0
-yourboard.com/index.php?action=profile;u=1 =>> yourboard.com/profile/user-public-name-1
+yourboard.com/index.php => yourboard.com/
+yourboard.com/index.php?board=1.0 => yourboard.com/general-discussion/
+yourboard.com/index.php?topic=1.0 => yourboard.com/general-discussion/welcome-smf-1.0
+yourboard.com/index.php?action=profile;u=1 => yourboard.com/profile/user-public-name-1
 ```
 
 ### Features:

@@ -41,7 +41,7 @@ class SimpleSEF
 	/**
 	 * @var array All ignored actions used in the forum
 	 */
-	protected $ignoreActions = ['admin', 'moderate', 'openidreturn', 'uploadAttach', '.xml', 'breezeajax', 'breezecover', 'breezemood', 'dlattach', 'viewsmfile', 'xmlhttp', 'sitemap', 'tpshout'];
+	protected $ignoreActions = ['admin', 'openidreturn', 'uploadAttach', '.xml', 'dlattach', 'viewsmfile', 'xmlhttp', 'sitemap', 'tpshout'];
 
 	/**
 	 * @var array Actions that have aliases
@@ -79,16 +79,21 @@ class SimpleSEF
 	protected static $redirect = false;
 
 	/**
-	 * The constructor method
+	 * Used hooks
+	 *
+	 * @return void
 	 */
-	public function __construct()
+	public function hooks()
 	{
-		global $modSettings;
+		$this->convertQueryString();
 
-		$this->actions       = !empty($modSettings['simplesef_actions']) ? explode(',', $modSettings['simplesef_actions']) : [];
-		$this->ignoreActions = array_merge($this->ignoreActions, !empty($modSettings['simplesef_ignore_actions']) ? explode(',', $modSettings['simplesef_ignore_actions']) : []);
-		$this->aliasActions  = !empty($modSettings['simplesef_aliases']) ? safe_unserialize($modSettings['simplesef_aliases']) : [];
-		$this->userActions   = !empty($modSettings['simplesef_useractions']) ? explode(',', $modSettings['simplesef_useractions']) : [];
+		add_integration_function('integrate_actions', __CLASS__ . '::actions', false, __FILE__, true);
+		add_integration_function('integrate_buffer', __CLASS__ . '::fixBuffer', false, __FILE__, true);
+		add_integration_function('integrate_redirect', __CLASS__ . '::fixRedirectUrl', false, __FILE__, true);
+		add_integration_function('integrate_outgoing_email', __CLASS__ . '::fixEmailOutput', false, __FILE__, true);
+		add_integration_function('integrate_exit', __CLASS__ . '::fixXMLOutput', false, __FILE__, true);
+		add_integration_function('integrate_admin_areas', __CLASS__ . '::adminAreas', false, __FILE__, true);
+		add_integration_function('integrate_admin_search', __CLASS__ . '::adminSearch', false, __FILE__, true);
 	}
 
 	/**
@@ -99,6 +104,7 @@ class SimpleSEF
 	 */
 	public function init($force = false)
 	{
+		global $modSettings;
 		static $done = false;
 
 		if ($done && !$force)
@@ -108,7 +114,11 @@ class SimpleSEF
 
 		$this->loadBoardNames($force);
 		$this->loadExtensions($force);
-		$this->fixHooks($force);
+
+		$this->actions       = !empty($modSettings['simplesef_actions']) ? explode(',', $modSettings['simplesef_actions']) : [];
+		$this->ignoreActions = array_merge($this->ignoreActions, !empty($modSettings['simplesef_ignore_actions']) ? explode(',', $modSettings['simplesef_ignore_actions']) : []);
+		$this->aliasActions  = !empty($modSettings['simplesef_aliases']) ? safe_unserialize($modSettings['simplesef_aliases']) : [];
+		$this->userActions   = !empty($modSettings['simplesef_user_actions']) ? explode(',', $modSettings['simplesef_user_actions']) : [];
 
 		// We need to fix our GET array too...
 		parse_str(preg_replace('~&(\w+)(?=&|$)~', '&$1=', strtr($_SERVER['QUERY_STRING'], [';?' => '&', ';' => '&', '%00' => '', "\0" => ''])), $_GET);
@@ -169,6 +179,29 @@ class SimpleSEF
 	}
 
 	/**
+	 * Implements integrate_actions
+	 *
+	 * @param array $actions
+	 * @return void
+	 */
+	public function actions(&$actions)
+	{
+		$actions['simplesef-404'] = ['SimpleSEF.php', __CLASS__ . '::http404NotFound#'];
+	}
+
+	/**
+	 * Outputs a simple 'Not Found' message and the 404 header
+	 *
+	 * @return void
+	 */
+	public function http404NotFound()
+	{
+		loadLanguage('SimpleSEF');
+		header('HTTP/1.0 404 Not Found');
+		fatal_lang_error('simplesef_404', false, null, 404);
+	}
+
+	/**
 	 * Implements integrate_buffer
 	 * This is the core of the mod.  Rewrites the output buffer to create SEF
 	 * urls.  It will only rewrite urls for the site at hand, not other urls
@@ -176,7 +209,7 @@ class SimpleSEF
 	 * @param string $buffer The output buffer after SMF has output the templates
 	 * @return string Returns the altered buffer (or unaltered if the mod is disabled)
 	 */
-	public function ob_simplesef($buffer)
+	public function fixBuffer($buffer)
 	{
 		global $scripturl, $smcFunc, $boardurl, $txt, $modSettings, $context;
 
@@ -292,7 +325,7 @@ class SimpleSEF
 
 			ob_end_clean();
 			ob_start(!empty($modSettings['enableCompressedOutput']) ? 'ob_gzhandler' : '');
-			ob_start(array($this, 'ob_simplesef'));
+			ob_start(array($this, 'fixBuffer'));
 
 			echo $temp;
 		}
@@ -315,78 +348,11 @@ class SimpleSEF
 			return true;
 
 		// We're just fixing the subject and message
-		$subject = $this->ob_simplesef($subject);
-		$message = $this->ob_simplesef($message);
+		$subject = $this->fixBuffer($subject);
+		$message = $this->fixBuffer($message);
 
 		// We must return true, otherwise we fail!
 		return true;
-	}
-
-	/**
-	 * Implements integrate_actions
-	 *
-	 * @param array $actions
-	 * @return void
-	 */
-	public function actionArray(&$actions)
-	{
-		$actions['simplesef-404'] = ['SimpleSEF.php', 'SimpleSEF::http404NotFound#'];
-	}
-
-	/**
-	 * Outputs a simple 'Not Found' message and the 404 header
-	 *
-	 * @return void
-	 */
-	public function http404NotFound()
-	{
-		loadLanguage('SimpleSEF');
-		header('HTTP/1.0 404 Not Found');
-		fatal_lang_error('simplesef_404', false, null, 404);
-	}
-
-	/**
-	 * Implements integrate_menu_buttons
-	 * Adds some SimpleSEF settings to the main menu under the admin menu
-	 *
-	 * @param array $menu_buttons
-	 * @return void
-	 */
-	public function menuButtons(&$menu_buttons)
-	{
-		global $txt, $scripturl;
-
-		if (!allowedTo('admin_forum') || isset($menu_buttons['admin']['sub_buttons']['simplesef']))
-			return;
-
-		loadLanguage('SimpleSEF');
-
-		$counter = array_search('featuresettings', array_keys($menu_buttons['admin']['sub_buttons'])) + 1;
-
-		$menu_buttons['admin']['sub_buttons'] = array_merge(
-			array_slice($menu_buttons['admin']['sub_buttons'], 0, $counter, true), array('simplesef' => array(
-				'title' => $txt['simplesef'],
-				'href' => $scripturl . '?action=admin;area=simplesef',
-				'show' => true,
-				'sub_buttons' => array(
-					'basic' => array(
-						'title' => $txt['simplesef_basic'],
-						'href'  => $scripturl . '?action=admin;area=simplesef;sa=basic',
-						'show'  => true
-					),
-					'advanced' => array(
-						'title' => $txt['simplesef_advanced'],
-						'href'  => $scripturl . '?action=admin;area=simplesef;sa=advanced',
-						'show'  => true
-					),
-					'alias' => array(
-						'title' => $txt['simplesef_alias'],
-						'href'  => $scripturl . '?action=admin;area=simplesef;sa=alias',
-						'show'  => true
-					)
-				),
-			)), array_slice($menu_buttons['admin']['sub_buttons'], $counter, count($menu_buttons['admin']['sub_buttons']), true)
-		);
 	}
 
 	/**
@@ -406,16 +372,19 @@ class SimpleSEF
 		$counter = array_search('featuresettings', array_keys($admin_areas['config']['areas'])) + 1;
 
 		$admin_areas['config']['areas'] = array_merge(
-			array_slice($admin_areas['config']['areas'], 0, $counter, true), array('simplesef' => array(
-				'label' => $txt['simplesef'],
-				'function' => 'SimpleSEF::settings#',
-				'icon' => 'packages',
-				'subsections' => array(
-					'basic'    => array($txt['simplesef_basic']),
-					'advanced' => array($txt['simplesef_advanced']),
-					'alias'    => array($txt['simplesef_alias'])
-				),
-			)), array_slice($admin_areas['config']['areas'], $counter, count($admin_areas['config']['areas']), true)
+			array_slice($admin_areas['config']['areas'], 0, $counter, true),
+			array(
+				'simplesef' => array(
+					'label' => $txt['simplesef'],
+					'function' => __CLASS__ . '::settings#',
+					'icon' => 'packages',
+					'subsections' => array(
+						'basic'    => array($txt['simplesef_basic']),
+						'advanced' => array($txt['simplesef_advanced']),
+						'alias'    => array($txt['simplesef_alias'])
+					)
+				)
+			), array_slice($admin_areas['config']['areas'], $counter, count($admin_areas['config']['areas']), true)
 		);
 	}
 
@@ -429,8 +398,8 @@ class SimpleSEF
 	 */
 	public function adminSearch(&$language_files, &$include_files, &$settings_search)
 	{
-		$settings_search[] = array('SimpleSef::basicSettings', 'area=simplesef;sa=basic');
-		$settings_search[] = array('SimpleSef::advancedSettings', 'area=simplesef;sa=advanced');
+		$settings_search[] = array(__CLASS__ . '::basicSettings', 'area=simplesef;sa=basic');
+		$settings_search[] = array(__CLASS__ . '::advancedSettings', 'area=simplesef;sa=advanced');
 	}
 
 	/**
@@ -440,10 +409,11 @@ class SimpleSEF
 	 */
 	public function settings()
 	{
-		global $txt, $context, $sourcedir;
+		global $sourcedir, $context, $txt;
+
+		loadTemplate('SimpleSEF');
 
 		require_once($sourcedir . '/ManageSettings.php');
-		loadTemplate('SimpleSEF');
 		$context['page_title'] = $txt['simplesef'];
 
 		$subActions = array(
@@ -466,7 +436,6 @@ class SimpleSEF
 		);
 
 		$call = !empty($_REQUEST['sa']) && isset($subActions[$_REQUEST['sa']]) ? $subActions[$_REQUEST['sa']] : 'basicSettings';
-
 		$this->{$call}();
 	}
 
@@ -540,7 +509,7 @@ class SimpleSEF
 			array('title', 'title', 'label' => $txt['simplesef_action_title']),
 			array('desc', 'desc', 'label' => $txt['simplesef_action_desc']),
 			array('text', 'simplesef_actions', 'size' => 50, 'disabled' => 'disabled', 'preinput' => '<input type="hidden" name="simplesef_actions" value="' . ($modSettings['simplesef_actions'] ?? '') . '">'),
-			array('text', 'simplesef_useractions', 'size' => 50, 'disabled' => 'disabled', 'preinput' => '<input type="hidden" name="simplesef_useractions" value="' . ($modSettings['simplesef_useractions'] ?? '') . '">')
+			array('text', 'simplesef_user_actions', 'size' => 50, 'disabled' => 'disabled', 'preinput' => '<input type="hidden" name="simplesef_user_actions" value="' . ($modSettings['simplesef_user_actions'] ?? '') . '">')
 		);
 
 		if ($return_config)
@@ -556,8 +525,8 @@ class SimpleSEF
 			function editAreas() {
 				document.getElementById("simplesef_actions").disabled = "";
 				document.getElementById("setting_simplesef_actions").nextSibling.nextSibling.style.color = "";
-				document.getElementById("simplesef_useractions").disabled = "";
-				document.getElementById("setting_simplesef_useractions").nextSibling.nextSibling.style.color = "";
+				document.getElementById("simplesef_user_actions").disabled = "";
+				document.getElementById("setting_simplesef_user_actions").nextSibling.nextSibling.style.color = "";
 				return false;
 			}
 			var swapper = new SelectSwapper({
@@ -607,9 +576,9 @@ class SimpleSEF
 			if (isset($_POST['original'], $_POST['alias'])) {
 				// Make sure we don't allow duplicate actions or aliases
 				$_POST['original'] = array_unique(array_filter($_POST['original'], function($x) {return $x != '';}));
-				$_POST['alias'] = array_unique(array_filter($_POST['alias'], function($x) {return $x != '';}));
-				$alias_original = array_intersect_key($_POST['original'], $_POST['alias']);
-				$alias_new = array_intersect_key($_POST['alias'], $_POST['original']);
+				$_POST['alias']    = array_unique(array_filter($_POST['alias'], function($x) {return $x != '';}));
+				$alias_original    = array_intersect_key($_POST['original'], $_POST['alias']);
+				$alias_new         = array_intersect_key($_POST['alias'], $_POST['original']);
 			}
 
 			$aliases = !empty($alias_original) ? array_combine($alias_original, $alias_new) : [];
@@ -730,54 +699,6 @@ class SimpleSEF
 	}
 
 	/**
-	 * Fix hooks, just in case
-	 *
-	 * @param bool $force
-	 * @return void
-	 */
-	public function fixHooks($force = false)
-	{
-		global $smcFunc, $modSettings;
-
-		if (!$force && cache_get_data('simplesef_fixhooks', 3600) !== NULL)
-			return;
-
-		$request = $smcFunc['db_query']('', '
-			SELECT variable, value
-			FROM {db_prefix}settings
-			WHERE variable LIKE {string:variable}', array(
-				'variable' => 'integrate_%'
-			)
-		);
-
-		$hooks = [];
-		while (($row = $smcFunc['db_fetch_assoc']($request)))
-			$hooks[$row['variable']] = $row['value'];
-
-		$smcFunc['db_free_result']($request);
-
-		$fixups = [];
-
-		if (!empty($hooks['integrate_pre_load']) && strpos($hooks['integrate_pre_load'], 'SimpleSEF') !== 0)
-			$fixups['integrate_pre_load'] = 'SimpleSEF::convertQueryString#,' . str_replace(',SimpleSEF::convertQueryString#', '', $hooks['integrate_pre_load']);
-
-		if (!empty($hooks['integrate_buffer']) && strpos($hooks['integrate_buffer'], 'SimpleSEF') !== 0)
-			$fixups['integrate_buffer'] = 'SimpleSEF::ob_simplesef#,' . str_replace(',SimpleSEF::ob_simplesef#', '', $hooks['integrate_buffer']);
-
-		if (!empty($hooks['integrate_exit']) && strpos($hooks['integrate_exit'], 'SimpleSEF') !== 0)
-			$fixups['integrate_exit'] = 'SimpleSEF::fixXMLOutput#,' . str_replace(',SimpleSEF::fixXMLOutput#', '', $hooks['integrate_exit']);
-
-
-		if (!empty($fixups))
-			updateSettings($fixups);
-
-		foreach ($fixups as $hook => $functions)
-			$modSettings[$hook] = str_replace($hooks[$hook], $fixups[$hook], $modSettings[$hook]);
-
-		cache_put_data('simplesef_fixhooks', true, 3600);
-	}
-
-	/**
 	 * Takes in a board name and tries to determine it's id
 	 *
 	 * @param string $boardName
@@ -837,7 +758,7 @@ class SimpleSEF
 
 	/**
 	 * Generates a topic name from it's id.  This is typically called from
-	 * create_sef_url which is called from ob_simplesef which prepopulates topics.
+	 * create_sef_url which is called from fixBuffer which prepopulates topics.
 	 * If the topic isn't prepopulated, it attempts to find it.
 	 *
 	 * @param int $id
@@ -941,7 +862,7 @@ class SimpleSEF
 		}
 
 		if (!empty($url_parts)) {
-			if (isset($url_parts[1]) && strpos($url_parts[0], 'sa.') === false && strpos($url_parts[0], 'p.') === false) {
+			if (isset($url_parts[1]) && strpos($url_parts[0], '.') === false) {
 				$current_value = array_pop($url_parts);
 				// Get the topic id
 				$topic = $current_value;

@@ -5,43 +5,23 @@ if (file_exists(dirname(__FILE__) . '/SSI.php') && !defined('SMF'))
 elseif(!defined('SMF'))
 	die('<b>Error:</b> Cannot install - please verify that you put this file in the same place as SMF\'s index.php and SSI.php files.');
 
-// List settings here
 $oldSettings = array(
 	'simplesef_enable',
 	'simplesef_space',
 	'simplesef_actions',
-	'simplesef_useractions',
+	'simplesef_user_actions',
 	'simplesef_ignore_actions',
 	'simplesef_advanced',
 	'simplesef_aliases'
 );
 
-$sef_functions = array(
-	'integrate_pre_include'    => '$sourcedir/SimpleSEF.php',
-	'integrate_pre_load'       => 'SimpleSEF::convertQueryString#',
-	'integrate_buffer'         => 'SimpleSEF::ob_simplesef#',
-	'integrate_redirect'       => 'SimpleSEF::fixRedirectUrl#',
-	'integrate_outgoing_email' => 'SimpleSEF::fixEmailOutput#',
-	'integrate_exit'           => 'SimpleSEF::fixXMLOutput#',
-	'integrate_admin_areas'    => 'SimpleSEF::adminAreas#',
-	'integrate_admin_search'   => 'SimpleSEF::adminSearch#',
-	'integrate_menu_buttons'   => 'SimpleSEF::menuButtons#',
-	'integrate_actions'        => 'SimpleSEF::actionArray#'
+$smcFunc['db_query']('', '
+	DELETE FROM {db_prefix}settings
+	WHERE variable IN ({array_string:settings})',
+	array(
+		'settings' => $oldSettings
+	)
 );
-
-if (!empty($smcFunc['db_query'])) {
-	$smcFunc['db_query']('', '
-		DELETE FROM {db_prefix}settings
-		WHERE variable IN ({array_string:settings})', array(
-			'settings' => $oldSettings
-		)
-	);
-
-	// Remove hooks (for 2.0)
-	foreach ($sef_functions as $hook => $function)
-		remove_integration_function($hook, $function);
-} else
-	db_query("DELETE FROM {$db_prefix}settings WHERE variable IN ('" . implode('\', \'', array_merge($oldSettings, array_keys($sef_functions))) . "')", __FILE__, __LINE__);
 
 if (removeHtaccess() === false)
 	log_error('Could not remove or edit .htaccess file upon uninstall of SimpleSEF', 'debug');

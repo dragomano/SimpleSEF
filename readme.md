@@ -3,7 +3,7 @@
 ![PHP](https://img.shields.io/badge/PHP-^7.2-blue.svg?style=flat)
 
 * **Original authors:** [Matt Zuba](https://bitbucket.org/mattzuba/simplesef), [Suki](https://github.com/MissAllSunday/SimpleSEF)
-* **Author:** Bugo [dragomano.ru](https://dragomano.ru/translations/simplesef)
+* **Contributor:** Bugo [dragomano.ru](https://dragomano.ru/translations/simplesef)
 * **License:** [MPL 1.1 license](https://www.mozilla.org/en-US/MPL/1.1/)
 * **Compatible with:** SMF 2.1.x / PHP 7.2+
 * **Tested on:** PHP 7.2.29 / MariaDB 10.4.12
@@ -40,5 +40,13 @@ Please ensure your .htaccess or web.config file contains the proper information 
 * Добавлена русская локализация.
 * Адаптация для SMF 2.1.x.
 * Исправлены некоторые ошибки оригинального мода.
-* Удалены ненужные настройки и функции.
-* Интегрирован [Behat Transliterator](https://github.com/Behat/Transliterator).
+* Удалены ненужные настройки и функции (кому нужны — ставьте оригинальный мод):
+    * Создавать простые url (типа `/forum/board-1/`)
+    * Окончание url в темах и сообщениях (типа `.html`)
+    * Слова, удаляемые из адресов (уже есть в Behat Transliterator)
+    * Символы, удаляемые из адресов (уже есть в Behat Transliterator)
+    * URL-адреса в нижнем регистре (теперь нижний регистр по умолчанию)
+    * Разрешить использование псевдонимов, игнорирование некоторых областей и некоторые другие параметры (теперь расширенные настройки отображаются всегда)
+    * Режим отладки (вырезан полностью)
+    * Тестирование производительности (вырезано полностью)
+* Интегрирован [Behat Transliterator](https://github.com/Behat/Transliterator) v1.3.0.

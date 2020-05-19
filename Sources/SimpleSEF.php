@@ -74,6 +74,11 @@ class SimpleSEF
 	protected $extensions = [];
 
 	/**
+	 * @var string Space replacement
+	 */
+	protected $spaceChar = '-';
+
+	/**
 	 * @var bool Properly track redirects
 	 */
 	protected static $redirect = false;
@@ -119,6 +124,7 @@ class SimpleSEF
 		$this->ignoreActions = array_merge($this->ignoreActions, !empty($modSettings['simplesef_ignore_actions']) ? explode(',', $modSettings['simplesef_ignore_actions']) : []);
 		$this->aliasActions  = !empty($modSettings['simplesef_aliases']) ? safe_unserialize($modSettings['simplesef_aliases']) : [];
 		$this->userActions   = !empty($modSettings['simplesef_user_actions']) ? explode(',', $modSettings['simplesef_user_actions']) : [];
+		$this->spaceChar     = !empty($modSettings['simplesef_space']) ? $modSettings['simplesef_space'] : '-';
 
 		// We need to fix our GET array too...
 		parse_str(preg_replace('~&(\w+)(?=&|$)~', '&$1=', strtr($_SERVER['QUERY_STRING'], [';?' => '&', ';' => '&', '%00' => '', "\0" => ''])), $_GET);
@@ -135,7 +141,7 @@ class SimpleSEF
 	 */
 	public function convertQueryString()
 	{
-		global $boardurl, $modSettings, $scripturl, $smcFunc, $language, $sourcedir;
+		global $modSettings, $scripturl, $boardurl;
 
 		if (empty($modSettings['simplesef_enable']) || (isset($_REQUEST['action']) && in_array($_REQUEST['action'], $this->ignoreActions)))
 			return;
@@ -163,7 +169,7 @@ class SimpleSEF
 		// If the URL contains index.php but not our ignored actions, rewrite the URL
 		if (strpos($_SERVER['REQUEST_URL'], 'index.php') !== false && !(isset($_GET['xml']) || (!empty($_GET['action']) && in_array($_GET['action'], $this->ignoreActions)))) {
 			header('HTTP/1.1 301 Moved Permanently');
-			header('Location: ' . $this->create_sef_url($_SERVER['REQUEST_URL']));
+			header('Location: ' . $this->getSefUrl($_SERVER['REQUEST_URL']));
 			exit;
 		}
 
@@ -211,7 +217,7 @@ class SimpleSEF
 	 */
 	public function fixBuffer($buffer)
 	{
-		global $scripturl, $smcFunc, $boardurl, $txt, $modSettings, $context;
+		global $modSettings, $scripturl, $boardurl;
 
 		if (empty($modSettings['simplesef_enable']) || (isset($_REQUEST['action']) && in_array($_REQUEST['action'], $this->ignoreActions)))
 			return $buffer;
@@ -244,7 +250,7 @@ class SimpleSEF
 		if (!empty($matches[0])) {
 			$replacements = [];
 			foreach (array_unique($matches[1]) as $i => $url) {
-				$replacement = $this->create_sef_url($url);
+				$replacement = $this->getSefUrl($url);
 
 				if ($url != $replacement)
 					$replacements[$matches[0][$i]] = $replacement . $matches[2][$i];
@@ -255,11 +261,11 @@ class SimpleSEF
 
 		// Gotta fix up some javascript laying around in the templates
 		$extra_replacements = array(
-			'/$d\',' => $modSettings['simplesef_space'] . '%1$d/\',', // Page index for MessageIndex
+			'/$d\',' => $this->spaceChar . '%1$d/\',', // Page index for MessageIndex
 			'/rand,' => '/rand=', // Verification Image
 			'%1.html$d\',' => '%1$d.html\',', // Page index on MessageIndex for topics
 			$boardurl . '/topic/' => $scripturl . '?topic=', // Also for above
-			'%1' . $modSettings['simplesef_space'] . '%1$d/\',' => '%1$d/\',', // Page index on Members listing
+			'%1' . $this->spaceChar . '%1$d/\',' => '%1$d/\',', // Page index on Members listing
 			'var smf_scripturl = "' . $boardurl . '/' => 'var smf_scripturl = "' . $scripturl
 		);
 		$buffer = str_replace(array_keys($extra_replacements), array_values($extra_replacements), $buffer);
@@ -300,7 +306,7 @@ class SimpleSEF
 
 		// Only do this if it's an URL for this board
 		if (strpos($setLocation, $scripturl) !== false)
-			$setLocation = $this->create_sef_url($setLocation);
+			$setLocation = $this->getSefUrl($setLocation);
 	}
 
 	/**
@@ -605,7 +611,7 @@ class SimpleSEF
 	 * @param string $url URL to SEFize
 	 * @return string Either the original url if not enabled or ignored, or a new URL
 	 */
-	public function create_sef_url($url)
+	public function getSefUrl($url)
 	{
 		global $modSettings, $sourcedir;
 
@@ -706,12 +712,10 @@ class SimpleSEF
 	 */
 	protected function getBoardId($boardName)
 	{
-		global $modSettings;
-
 		if (($boardId = array_search($boardName, $this->boardNames)) !== false)
 			return $boardId . '.0';
 
-		if (($index = strrpos($boardName, $modSettings['simplesef_space'])) === false)
+		if (($index = strrpos($boardName, $this->spaceChar)) === false)
 			return false;
 
 		$page = substr($boardName, $index + 1);
@@ -735,8 +739,6 @@ class SimpleSEF
 	 */
 	protected function getBoardName($id)
 	{
-		global $modSettings;
-
 		if (empty($id))
 			return '';
 
@@ -751,14 +753,14 @@ class SimpleSEF
 		$boardName = !empty($this->boardNames[$id]) ? $this->boardNames[$id] : 'board';
 
 		if (isset($page) && ($page > 0))
-			$boardName = $boardName . $modSettings['simplesef_space'] . $page;
+			$boardName = $boardName . $this->spaceChar . $page;
 
 		return $boardName;
 	}
 
 	/**
 	 * Generates a topic name from it's id.  This is typically called from
-	 * create_sef_url which is called from fixBuffer which prepopulates topics.
+	 * self::getSefUrl which is called from self::fixBuffer which prepopulates topics.
 	 * If the topic isn't prepopulated, it attempts to find it.
 	 *
 	 * @param int $id
@@ -766,8 +768,6 @@ class SimpleSEF
 	 */
 	protected function getTopicName($id)
 	{
-		global $modSettings, $smcFunc;
-
 		$data = explode('.', $id);
 		$value = $data[0];
 		$start = $data[1] ?: 0;
@@ -786,7 +786,7 @@ class SimpleSEF
 		}
 
 		// Put it all together
-		return $boardName . '/' . $topicName . $modSettings['simplesef_space'] . $value . '.' . $start;
+		return $boardName . '/' . $topicName . $this->spaceChar . $value . '.' . $start;
 	}
 
 	/**
@@ -798,16 +798,14 @@ class SimpleSEF
 	 */
 	protected function getUserName($id)
 	{
-		global $modSettings, $smcFunc;
-
 		if (empty($this->userNames[$id]))
 			$this->loadUserNames((int) $id);
 
 		// And if it's still empty...
 		if (empty($this->userNames[$id]))
-			return 'user' . $modSettings['simplesef_space'] . $id;
+			return 'user' . $this->spaceChar . $id;
 		else
-			return $this->userNames[$id] . $modSettings['simplesef_space'] . $id;
+			return $this->userNames[$id] . $this->spaceChar . $id;
 	}
 
 	/**
@@ -820,7 +818,7 @@ class SimpleSEF
 	 */
 	protected function route($query)
 	{
-		global $modSettings, $sourcedir;
+		global $sourcedir;
 
 		$url_parts = explode('/', trim($query, '/'));
 		$querystring = [];
@@ -838,7 +836,7 @@ class SimpleSEF
 			$current_value = reset($url_parts);
 
 			// User
-			if (!empty($current_value) && in_array($querystring['action'], $this->userActions) && ($index = strrpos($current_value, $modSettings['simplesef_space'])) !== false) {
+			if (!empty($current_value) && in_array($querystring['action'], $this->userActions) && ($index = strrpos($current_value, $this->spaceChar)) !== false) {
 				$user = substr(array_shift($url_parts), $index + 1);
 
 				if (is_numeric($user))
@@ -866,7 +864,7 @@ class SimpleSEF
 				$current_value = array_pop($url_parts);
 				// Get the topic id
 				$topic = $current_value;
-				$topic = substr($topic, strrpos($topic, $modSettings['simplesef_space']) + 1);
+				$topic = substr($topic, strrpos($topic, $this->spaceChar) + 1);
 				$querystring['topic'] = $topic;
 				array_pop($url_parts);
 			} else {
@@ -1046,26 +1044,13 @@ class SimpleSEF
 	 */
 	protected function getSlug($string)
 	{
-		global $sourcedir, $modSettings;
+		global $sourcedir;
 
 		if (empty($string))
 			return '';
 
 		require_once($sourcedir . '/SimpleSEF-Db/Transliterator.php');
 
-		return \Behat\Transliterator\Transliterator::transliterate($string, $modSettings['simplesef_space']);
-	}
-
-	/**
-	 * Helper function to properly explode a CSV list (Accounts for quotes)
-	 *
-	 * @param string $str String to explode
-	 * @return array Exploded string
-	 */
-	protected function explode_csv($str)
-	{
-		return !empty($str) ? preg_replace_callback('/^"(.*)"$/', function($match) {
-			return trim($match[1]);
-		}, preg_split('/,(?=(?:[^"]*"[^"]*")*(?![^"]*"))/', trim($str))) : [];
+		return \Behat\Transliterator\Transliterator::transliterate($string, $this->spaceChar);
 	}
 }

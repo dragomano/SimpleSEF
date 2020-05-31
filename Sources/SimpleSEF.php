@@ -226,8 +226,7 @@ class SimpleSEF
 			return $buffer;
 
 		// Bump up our memory limit a bit
-		if (@ini_get('memory_limit') < 128)
-			@ini_set('memory_limit', '128M');
+		setMemoryLimit('128M');
 
 		// Grab the topics...
 		$matches = [];
@@ -442,7 +441,7 @@ class SimpleSEF
 		);
 
 		$call = !empty($_REQUEST['sa']) && isset($subActions[$_REQUEST['sa']]) ? $subActions[$_REQUEST['sa']] : 'basicSettings';
-		$this->{$call}();
+		self::{$call}();
 	}
 
 	/**
@@ -451,7 +450,7 @@ class SimpleSEF
 	 * @param bool $return_config
 	 * @return void
 	 */
-	public function basicSettings($return_config = false)
+	public static function basicSettings($return_config = false)
 	{
 		global $sourcedir, $context, $txt, $scripturl, $modSettings, $boarddir;
 
@@ -503,7 +502,7 @@ class SimpleSEF
 	 * @param bool $return_config
 	 * @return void
 	 */
-	public function advancedSettings($return_config = false)
+	public static function advancedSettings($return_config = false)
 	{
 		global $context, $txt, $modSettings, $scripturl;
 

@@ -6,7 +6,7 @@
 * **Contributor:** Bugo [dragomano.ru](https://dragomano.ru/translations/simplesef)
 * **License:** [MPL 1.1 license](https://www.mozilla.org/en-US/MPL/1.1/)
 * **Compatible with:** SMF 2.1.x / PHP 7.2+
-* **Tested on:** PHP 7.3.18 / MariaDB 10.4.12
+* **Tested on:** PHP 7.3.18 / MariaDB 10.4.13
 * **Hooks only:** Yes
 * **Languages:** English, Russian
 
@@ -50,3 +50,4 @@ Please ensure your .htaccess or web.config file contains the proper information 
     * Режим отладки (вырезан полностью)
     * Тестирование производительности (вырезано полностью)
 * Интегрирован [Behat Transliterator](https://github.com/Behat/Transliterator) v1.3.0.
+* Добавлена возможность искать настройки мода через быстрый поиск в админке.

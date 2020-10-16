@@ -203,7 +203,9 @@ class SimpleSEF
 	public function http404NotFound()
 	{
 		loadLanguage('SimpleSEF');
+
 		header('HTTP/1.0 404 Not Found');
+
 		fatal_lang_error('simplesef_404', false, null, 404);
 	}
 
@@ -226,7 +228,8 @@ class SimpleSEF
 			return $buffer;
 
 		// Bump up our memory limit a bit
-		setMemoryLimit('128M');
+		if (@ini_get('memory_limit') < 128)
+			@ini_set('memory_limit', '128M');
 
 		// Grab the topics...
 		$matches = [];
@@ -441,7 +444,7 @@ class SimpleSEF
 		);
 
 		$call = !empty($_REQUEST['sa']) && isset($subActions[$_REQUEST['sa']]) ? $subActions[$_REQUEST['sa']] : 'basicSettings';
-		self::{$call}();
+		$this->{$call}();
 	}
 
 	/**
@@ -450,7 +453,7 @@ class SimpleSEF
 	 * @param bool $return_config
 	 * @return void
 	 */
-	public static function basicSettings($return_config = false)
+	public function basicSettings($return_config = false)
 	{
 		global $sourcedir, $context, $txt, $scripturl, $modSettings, $boarddir;
 
@@ -502,7 +505,7 @@ class SimpleSEF
 	 * @param bool $return_config
 	 * @return void
 	 */
-	public static function advancedSettings($return_config = false)
+	public function advancedSettings($return_config = false)
 	{
 		global $context, $txt, $modSettings, $scripturl;
 
@@ -665,9 +668,9 @@ class SimpleSEF
 			}
 
 			foreach ($params as $key => $value) {
-				if ($value == '')
-					$sefstring3 .= $key . './';
-				else {
+				if ($value == '') {
+					$sefstring3 .= $key . '/';
+				} else {
 					$sefstring2 .= $key;
 					if (is_array($value))
 						$sefstring2 .= '[' . key($value) . '].' . $value[key($value)] . '/';
@@ -688,17 +691,17 @@ class SimpleSEF
 		if (isset($query_parts['user']))
 			$sefstring .= $query_parts['user'] . '/';
 
+		if (isset($query_parts['board']))
+			$sefstring .= $query_parts['board'] . '/';
+
+		if (isset($query_parts['topic']))
+			$sefstring .= $query_parts['topic'] . '/';
+
 		if (isset($sefstring2))
 			$sefstring .= $sefstring2;
 
 		if (isset($sefstring3))
 			$sefstring .= $sefstring3;
-
-		if (isset($query_parts['board']))
-			$sefstring .= $query_parts['board'] . '/';
-
-		if (isset($query_parts['topic']))
-			$sefstring .= $query_parts['topic'];
 
 		return str_replace('index.php' . (!empty($url_parts['query']) ? '?' . $url_parts['query'] : ''), $sefstring, $url);
 	}
@@ -860,43 +863,43 @@ class SimpleSEF
 
 		if (!empty($url_parts)) {
 			if (isset($url_parts[1]) && strpos($url_parts[0], '.') === false) {
-				$current_value = array_pop($url_parts);
+				$current_value = $url_parts[1];
+
 				// Get the topic id
 				$topic = $current_value;
 				$topic = substr($topic, strrpos($topic, $this->spaceChar) + 1);
 				$querystring['topic'] = $topic;
-				array_pop($url_parts);
 			} else {
 				$current_value = array_pop($url_parts);
 
 				// Check to see if the last one in the url array is a board
 				if (preg_match('~^board_(\d+)$~', $current_value, $match))
-					$boardId = $match[1];
+					$board = $match[1];
 				else
-					$boardId = $this->getBoardId($current_value);
+					$board = $this->getBoardId($current_value);
 
-				if ($boardId !== false)
-					$querystring['board'] = $boardId;
+				if ($board !== false)
+					$querystring['board'] = $board;
 				else
 					array_push($url_parts, $current_value);
 			}
 
-			if (!empty($url_parts) && (strpos($url_parts[0], '.') === false && strpos($url_parts[0], ',') === false))
+			if (empty($querystring['action']) && empty($querystring['board']) && empty($querystring['topic']) && strpos($url_parts[0], '.') === false) {
 				$querystring['action'] = 'simplesef-404';
+			}
 
 			// Handle unknown variables
 			$temp = [];
 			foreach ($url_parts as $part) {
 				if (strpos($part, '.') !== false)
 					$part = substr_replace($part, '=', strpos($part, '.'), 1);
-				// Backwards compatibility
-				elseif (strpos($part, ',') !== false)
-					$part = substr_replace($part, '=', strpos($part, ','), 1);
 
 				parse_str($part, $temp);
 				$querystring += $temp;
 			}
 		}
+
+		//dd("'$query' => " . var_export($querystring, true));
 
 		return $querystring;
 	}
@@ -986,7 +989,6 @@ class SimpleSEF
 
 		$ids = is_array($ids) ? $ids : [$ids];
 
-		// Fill the topic 'cache' in one fell swoop
 		$request = $smcFunc['db_query']('', '
 			SELECT t.id_topic, m.subject, t.id_board
 			FROM {db_prefix}topics AS t

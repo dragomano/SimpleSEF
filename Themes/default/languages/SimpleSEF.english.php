@@ -25,7 +25,7 @@ $txt['simplesef_basic']            = 'Basic Options';
 $txt['simplesef_enable']           = 'Enable SimpleSEF';
 $txt['simplesef_enable_desc']      = 'Requires mod_rewrite support or Url Rewrite/web.config (IIS7) support.';
 $txt['simplesef_space']            = 'Space replacement';
-$txt['simplesef_space_desc']       = 'Character to be used instead of spaces in URLs. Typically _ or -. Leave empty to use the default value: -';
+$txt['simplesef_space_desc']       = 'Character to be used instead of spaces in URLs. Typically "-".';
 $txt['simplesef_action_title']     = 'Actions and User Actions';
 $txt['simplesef_action_desc']      = 'These are all of the actions of the board. You normally do not need to edit this list. Infact, if you do edit these lists, it can cause parts of your board not to function temporarily. These are only provided to be edited if you are directed to do so. [<a href="#" onclick="return editAreas();">Edit</a>]';
 $txt['simplesef_actions']          = 'Actions';

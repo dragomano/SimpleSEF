@@ -3,7 +3,7 @@
 ![PHP](https://img.shields.io/badge/PHP-^7.2-blue.svg?style=flat)
 
 * **Original authors:** [Matt Zuba](https://bitbucket.org/mattzuba/), [Suki](https://github.com/MissAllSunday)
-* **Contributor:** [Bugo](https://dragomano.ru/translations/simplesef)
+* **Contributor:** [Bugo](https://dragomano.ru/reviews/simplesef)
 * **License:** [MPL 1.1 license](https://www.mozilla.org/en-US/MPL/1.1/)
 * **Compatible with:** SMF 2.1.x / PHP 7.2+
 * **Tested on:** PHP 7.4.11 / MariaDB 10.4.13

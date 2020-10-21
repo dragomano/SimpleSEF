@@ -25,7 +25,7 @@ $txt['simplesef_basic']            = 'Основные настройки';
 $txt['simplesef_enable']           = 'Включить SimpleSEF';
 $txt['simplesef_enable_desc']      = 'Требуется поддержка mod_rewrite (Apache) или web.config (IIS7).';
 $txt['simplesef_space']            = 'Заменитель пробела';
-$txt['simplesef_space_desc']       = 'Символ, используемый вместо пробела в адресах. Обычно _ (знак подчеркивания) или - (дефис).';
+$txt['simplesef_space_desc']       = 'Символ, используемый вместо пробела в адресах. Обычно «-» (дефис).';
 $txt['simplesef_action_title']     = 'Области (Actions)';
 $txt['simplesef_action_desc']      = 'Здесь перечислены все области форума. Обычно вам не нужно ничего изменять в этом списке. Но если вы всё-таки решитесь на это, будьте готовы к тому, что что-нибудь перестанет работать. [<a href="#" onclick="return editAreas();">Правка</a>]';
 $txt['simplesef_actions']          = 'Стандартные';

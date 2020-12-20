@@ -41,7 +41,7 @@ class SimpleSEF
 	/**
 	 * @var array All ignored actions used in the forum
 	 */
-	protected $ignoreActions = ['admin', 'openidreturn', 'uploadAttach', '.xml', 'dlattach', 'viewsmfile', 'xmlhttp', 'sitemap', 'tpshout'];
+	protected $ignoreActions = ['admin', 'openidreturn', 'uploadAttach', '.xml', 'dlattach', 'viewsmfile', 'xmlhttp', 'sitemap', 'tpshout', 'kpr-ajax'];
 
 	/**
 	 * @var array Actions that have aliases
@@ -192,7 +192,7 @@ class SimpleSEF
 	 */
 	public function actions(&$actions)
 	{
-		$actions['simplesef-404'] = ['SimpleSEF.php', __CLASS__ . '::http404NotFound#'];
+		$actions['simplesef-404'] = array('SimpleSEF.php', array($this, 'http404NotFound'));
 	}
 
 	/**
@@ -384,7 +384,7 @@ class SimpleSEF
 			array(
 				'simplesef' => array(
 					'label' => $txt['simplesef'],
-					'function' => __CLASS__ . '::settings#',
+					'function' => array($this, 'settings'),
 					'icon' => 'packages',
 					'subsections' => array(
 						'basic'    => array($txt['simplesef_basic']),
@@ -406,8 +406,8 @@ class SimpleSEF
 	 */
 	public function adminSearch(&$language_files, &$include_files, &$settings_search)
 	{
-		$settings_search[] = array(__CLASS__ . '::basicSettings', 'area=simplesef;sa=basic');
-		$settings_search[] = array(__CLASS__ . '::advancedSettings', 'area=simplesef;sa=advanced');
+		$settings_search[] = array(array($this, 'basicSettings'), 'area=simplesef;sa=basic');
+		$settings_search[] = array(array($this, 'advancedSettings'), 'area=simplesef;sa=advanced');
 	}
 
 	/**

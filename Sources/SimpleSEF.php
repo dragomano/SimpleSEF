@@ -99,6 +99,7 @@ class SimpleSEF
 		add_integration_function('integrate_exit', __CLASS__ . '::fixXMLOutput', false, __FILE__, true);
 		add_integration_function('integrate_admin_areas', __CLASS__ . '::adminAreas', false, __FILE__, true);
 		add_integration_function('integrate_admin_search', __CLASS__ . '::adminSearch', false, __FILE__, true);
+		add_integration_function('integrate_modify_basic_settings', __CLASS__ . '::modifyBasicSettings', false, __FILE__, true);
 	}
 
 	/**
@@ -603,6 +604,27 @@ class SimpleSEF
 
 			updateSettings($updates);
 			redirectexit('action=admin;area=simplesef;sa=alias');
+		}
+	}
+
+	/**
+	 * Remove queryless urls setting
+	 *
+	 * @param array $config_vars
+	 * @return void
+	 */
+	public function modifyBasicSettings(&$config_vars)
+	{
+		global $modSettings;
+
+		if (empty($modSettings['simplesef_enable']))
+			return;
+
+		foreach ($config_vars as $id => $config_var) {
+			if (isset($config_var[1]) && $config_var[1] === 'queryless_urls') {
+				unset($config_vars[$id]);
+				break;
+			}
 		}
 	}
 

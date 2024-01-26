@@ -1,2 +1,5 @@
 vendor
 composer.lock
+
+src/Themes/default/languages/*
+!src/Themes/default/languages/SimpleSEF.english.php

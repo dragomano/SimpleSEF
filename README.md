@@ -4,6 +4,7 @@
 ![License](https://img.shields.io/github/license/dragomano/simplesef)
 ![Hooks only: Yes](https://img.shields.io/badge/Hooks%20only-YES-blue)
 ![PHP](https://img.shields.io/badge/PHP-^8.0-blue.svg?style=flat)
+[![Crowdin](https://badges.crowdin.net/simplesef/localized.svg)](https://crowdin.com/project/simplesef)
 
 - **Original authors:** [Matt Zuba](https://bitbucket.org/mattzuba/), [Suki](https://github.com/MissAllSunday)
 - **Contributor:** [Bugo](https://dragomano.ru/reviews/simplesef)

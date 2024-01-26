@@ -649,7 +649,7 @@ class SimpleSEF
 				if (!in_array($query_parts['action'], $this->userActions))
 					$this->userActions[] = $query_parts['action'];
 
-				$query_parts['user'] = $this->getUserName($params['u']);
+				$query_parts['user'] = $this->getUserName((int) $params['u']);
 				unset($params['u'], $params['user']);
 			}
 		}

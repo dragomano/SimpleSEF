@@ -255,6 +255,7 @@ class SimpleSEF
 			'%1' . $this->spaceChar . '%1$d/\',' => '%1$d/\',', // Page index on Members listing
 			'var smf_scripturl = "' . $boardurl . '/' => 'var smf_scripturl = "' . $scripturl
 		];
+
 		$buffer = str_replace(array_keys($extra_replacements), array_values($extra_replacements), $buffer);
 
 		// Check to see if we need to update the actions lists
@@ -387,7 +388,7 @@ class SimpleSEF
 	 * @param array $settings_search
 	 * @return void
 	 */
-	public function adminSearch($language_files, $include_files, &$settings_search): void
+	public function adminSearch(array $language_files, array $include_files, array &$settings_search): void
 	{
 		$settings_search[] = [[$this, 'basicSettings'], 'area=simplesef;sa=basic'];
 		$settings_search[] = [[$this, 'advancedSettings'], 'area=simplesef;sa=advanced'];
@@ -662,12 +663,12 @@ class SimpleSEF
 			$sefstring2 = $extension->create($params);
 		} else {
 			if (empty($query_parts['action']) && !empty($params['board'])) {
-				$query_parts['board'] = $this->getBoardName((int) $params['board']);
+				$query_parts['board'] = $this->getBoardName($params['board']);
 				unset($params['board']);
 			}
 
 			if (empty($query_parts['action']) && !empty($params['topic'])) {
-				$query_parts['topic'] = $this->getTopicName((int) $params['topic']);
+				$query_parts['topic'] = $this->getTopicName($params['topic']);
 				unset($params['topic']);
 			}
 
@@ -740,10 +741,10 @@ class SimpleSEF
 	 * Generates a board name from the ID.  Checks the existing array and reloads
 	 * it if it's not in there for some reason
 	 *
-	 * @param int $id
+	 * @param string $id
 	 * @return string
 	 */
-	protected function getBoardName(int $id): string
+	protected function getBoardName(string $id): string
 	{
 		if (empty($id))
 			return '';
@@ -769,20 +770,18 @@ class SimpleSEF
 	 * self::getSefUrl which is called from self::fixBuffer which prepopulates topics.
 	 * If the topic isn't prepopulated, it attempts to find it.
 	 *
-	 * @param int $id
+	 * @param string $id
 	 * @return string Topic name with it's associated board name
 	 */
-	protected function getTopicName(int $id): string
+	protected function getTopicName(string $id): string
 	{
 		$data = explode('.', $id);
 		$value = $data[0];
-		$start = $data[1] ?: 0;
+		$start = $data[1] ?? 0;
 
-		// If the topic id isn't here (probably from a redirect) we need a query to get it
 		if (empty($this->topicNames[$value]))
 			$this->loadTopicNames((int) $value);
 
-		// and if it still doesn't exist
 		if (empty($this->topicNames[$value])) {
 			$topicName = 'topic';
 			$boardName = 'board';
@@ -791,7 +790,6 @@ class SimpleSEF
 			$boardName = $this->getBoardName($this->topicNames[$value]['board_id']);
 		}
 
-		// Put it all together
 		return $boardName . '/' . $topicName . $this->spaceChar . $value . '.' . $start;
 	}
 
@@ -918,9 +916,9 @@ class SimpleSEF
 	{
 		global $sourcedir;
 
-		if ($force || ($this->extensions = (array) cache_get_data('simplesef_extensions', 36000)) === NULL) {
+		if ($force || ($extensions = cache_get_data('simplesef_extensions', 36000)) === NULL) {
 			$ext_dir = $sourcedir . '/SimpleSEF-Ext';
-			$this->extensions = [];
+			$extensions = [];
 
 			if (is_readable($ext_dir)) {
 				$plugin_dirs = glob($ext_dir . '/*', GLOB_ONLYDIR);
@@ -933,13 +931,15 @@ class SimpleSEF
 						if (in_array($filename, ['.', '..']) || preg_match('~ssef_([a-zA-Z_-]+)\.php~', $filename, $match) == 0)
 							continue;
 
-						$this->extensions[$match[1]] = $filename;
+						$extensions[$match[1]] = $filename;
 					}
 				}
 			}
 
-			cache_put_data('simplesef_extensions', $this->extensions, 36000);
+			cache_put_data('simplesef_extensions', $extensions, 36000);
 		}
+
+		$this->extensions = $extensions;
 	}
 
 	/**
@@ -953,7 +953,7 @@ class SimpleSEF
 	{
 		global $smcFunc;
 
-		if ($force || ($this->boardNames = (array) cache_get_data('simplesef_board_list', 36000)) === NULL) {
+		if ($force || ($boards = cache_get_data('simplesef_board_list', 36000)) === NULL) {
 			$request = $smcFunc['db_query']('', /** @lang text */ '
 				SELECT id_board, name
 				FROM {db_prefix}boards',
@@ -974,10 +974,10 @@ class SimpleSEF
 
 			$smcFunc['db_free_result']($request);
 
-			$this->boardNames = array_flip($boards);
-
-			cache_put_data('simplesef_board_list', $this->boardNames, 36000);
+			cache_put_data('simplesef_board_list', $boards, 36000);
 		}
+
+		$this->boardNames = array_flip($boards);
 	}
 
 	/**

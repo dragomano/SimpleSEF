@@ -1,33 +1,18 @@
-<?php
+<?php declare(strict_types=1);
 
-/* * **** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
+/**
+ * SimpleSEF.php
  *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
+ * @package SimpleSEF
+ * @link https://github.com/dragomano/SimpleSEF
+ * @author Matt Zuba (https://bitbucket.org/mattzuba/simplesef)
+ * @contributors Suki (Jessica Gonzalez), Bugo
+ * @copyright 2019-2024 Bugo
+ * @license https://github.com/dragomano/SimpleSEF#MPL-2.0-1-ov-file MPL-2.0
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is http://code.mattzuba.com code.
- *
- * The Initial Developer of the Original Code is
- * Matt Zuba.
- * Portions created by the Initial Developer are Copyright (C) 2010-2011
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *
- * Jessica Gonzalez
- * Bugo
- *
- * ***** END LICENSE BLOCK ***** */
+ * @version 2.4.7
+ */
 
-// No Direct Access!
 if (!defined('SMF'))
 	die('No direct access...');
 
@@ -416,10 +401,24 @@ class SimpleSEF
 
 		loadGeneralSettingParameters($subActions, 'basic');
 
+		$codes = [
+			parse_bbc('[code]RewriteEngine On<br># Uncomment the following line if its not working right<br># RewriteBase /<br>RewriteCond %{REQUEST_FILENAME} !-f<br>RewriteCond %{REQUEST_FILENAME} !-d<br>RewriteRule ^(.*)$ index.php?q=$1 [L,QSA][/code]'),
+			parse_bbc('[code]&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;<br>&lt;configuration&gt;<br>    &lt;system.webServer&gt;<br>        &lt;rewrite&gt;<br>            &lt;rules&gt;<br>                &lt;rule name=&quot;SimpleSEF&quot; stopProcessing=&quot;true&quot;&gt;<br>                    &lt;match url=&quot;^(.*)$&quot; ignoreCase=&quot;false&quot; /&gt;<br>                    &lt;conditions logicalGrouping=&quot;MatchAll&quot;&gt;<br>                        &lt;add input=&quot;{REQUEST_FILENAME}&quot; matchType=&quot;IsFile&quot; negate=&quot;true&quot; pattern=&quot;&quot; ignoreCase=&quot;false&quot; /&gt;<br>                        &lt;add input=&quot;{REQUEST_FILENAME}&quot; matchType=&quot;IsDirectory&quot; negate=&quot;true&quot; pattern=&quot;&quot; ignoreCase=&quot;false&quot; /&gt;<br>                    &lt;/conditions&gt;<br>                    &lt;action type=&quot;Rewrite&quot; url=&quot;index.php?q={R:1}&quot; appendQueryString=&quot;true&quot; /&gt;<br>                &lt;/rule&gt;<br>            &lt;/rules&gt;<br>        &lt;/rewrite&gt;<br>    &lt;/system.webServer&gt;<br>&lt;/configuration&gt;[/code]'),
+			parse_bbc('[code]$HTTP[&quot;host&quot;] =~ &quot;(www.)?example.com&quot; {<br>   url.rewrite-final += (<br>      # Allow all normal files<br>      &quot;^/forum/.*\.(js|ico|gif|jpg|png|swf|css|htm|php)(\?.*)?$&quot; =&gt; &quot;$0&quot;,<br>      # Rewrite everything else<br>      &quot;^/([^.?]*)$&quot; =&gt; &quot;/index.php?q=$1&quot;<br>   )<br>}[/code]'),
+			parse_bbc('[code]if (!-e $request_filename) {<br>    rewrite ^/(.*)$ /index.php?q=$1 last;<br>}[/code]'),
+			/** @lang text */
+			'<script>
+				document.getElementById("simplesef_help").style.display = "none";
+				function showSimpleSEFHelp() {
+					document.getElementById("simplesef_help").style.display = (document.getElementById("simplesef_help").style.display == "none") ? "" : "none";
+				}
+			</script>'
+		];
+
 		// Load up all the tabs...
 		$context[$context['admin_menu_name']]['tab_data'] = [
 			'title' => $txt['simplesef'],
-			'description' => $txt['simplesef_desc'],
+			'description' => sprintf($txt['simplesef_desc'], $codes[0], $codes[1], $codes[2], $codes[3], $codes[4]),
 			'tabs' => [
 				'basic'    => [],
 				'advanced' => [],

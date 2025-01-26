@@ -1,10 +1,5 @@
 vendor
 composer.lock
 
-src/Sources/SimpleSEF-Db/data/*
-!src/Sources/SimpleSEF-Db/data/index.php
-
-src/Sources/SimpleSEF-Db/Transliterator.php
-
 src/Themes/default/languages/*
 !src/Themes/default/languages/SimpleSEF.english.php

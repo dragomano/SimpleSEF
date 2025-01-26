@@ -8,7 +8,7 @@
 
 - **Original authors:** [Matt Zuba](https://bitbucket.org/mattzuba/), [Suki](https://github.com/MissAllSunday)
 - **Contributor:** [Bugo](https://dragomano.ru/reviews/simplesef)
-- **Tested on:** PHP 8.0.30 / MariaDB 10.6.11
+- **Tested on:** PHP 8.2.27 / MariaDB 11.2.2
 - **Languages:** English, Russian
 
 ## Description
@@ -34,11 +34,11 @@ yourboard.com/index.php?action=profile;u=1 => yourboard.com/profile/user-public-
 - Removed unnecessary settings and functions (if you need them, install [original mod](https://github.com/MissAllSunday/SimpleSEF)):
   - Create simple URLs (like `/forum/board-1/`)
   - URL endings in topics and messages (like `.html`)
-  - Words removed from addresses (already available in Behat Transliterator)
-  - Characters removed from addresses (already available in Behat Transliterator)
+  - Words removed from addresses
+  - Characters removed from addresses
   - URLs in lower case (lower case is now the default)
   - Allow the use of aliases, ignore some areas and some other options (advanced settings are now always shown)
   - Debug mode
   - Performance testing
-- Integrated [Behat Transliterator](https://github.com/Behat/Transliterator) v1.5.0.
+- Integrated [cocur/slugify](https://github.com/cocur/slugify) package.
 - Added the ability to search for mod settings through a quick search in the admin panel.

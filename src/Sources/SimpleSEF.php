@@ -28,7 +28,7 @@ class SimpleSEF
 	/**
 	 * @var array All ignored actions used in the forum
 	 */
-	protected array $ignoreActions = [
+	protected array $ignoredActions = [
 		'admin',
 		'openidreturn',
 		'uploadAttach',
@@ -84,9 +84,16 @@ class SimpleSEF
 
 	private Slugify $slugify;
 
+	public function __construct()
+	{
+		require_once __DIR__ . '/SimpleSEF-Db/vendor/autoload.php';
+		require_once __DIR__ . '/SimpleSEF-Db/CustomRuleProvider.php';
+
+		$this->slugify = new Slugify(['separator' => $this->spaceChar], new CustomRuleProvider());
+	}
+
 	public function hooks(): void
 	{
-		$this->setSlugify();
 		$this->convertQueryString();
 
 		add_integration_function('integrate_actions', __CLASS__ . '::actions', false, __FILE__, true);
@@ -119,7 +126,7 @@ class SimpleSEF
 		$this->loadExtensions($force);
 
 		$this->actions       = empty($modSettings['simplesef_actions']) ? [] : explode(',', $modSettings['simplesef_actions']);
-		$this->ignoreActions = array_merge($this->ignoreActions, empty($modSettings['simplesef_ignore_actions']) ? [] : explode(',', $modSettings['simplesef_ignore_actions']));
+		$this->ignoredActions = array_merge($this->ignoredActions, empty($modSettings['simplesef_ignore_actions']) ? [] : explode(',', $modSettings['simplesef_ignore_actions']));
 		$this->aliasActions  = empty($modSettings['simplesef_aliases']) ? [] : safe_unserialize($modSettings['simplesef_aliases']);
 		$this->userActions   = empty($modSettings['simplesef_user_actions']) ? [] : explode(',', $modSettings['simplesef_user_actions']);
 		$this->spaceChar     = empty($modSettings['simplesef_space']) ? $this->spaceChar : $modSettings['simplesef_space'];
@@ -129,7 +136,6 @@ class SimpleSEF
 	}
 
 	/**
-	 * Implements integrate_pre_load
 	 * Converts the incoming query string 'q=' into a proper querystring and container
 	 * variable array. q= comes from the .htaccess rewrite.
 	 * Will have to figure out how to do some checking of other types of SEF mods
@@ -141,11 +147,7 @@ class SimpleSEF
 	{
 		global $modSettings, $scripturl, $boardurl;
 
-		if (
-			empty($modSettings['simplesef_enable'])
-			|| isset($_REQUEST['xml'])
-			|| (isset($_REQUEST['action']) && in_array($_REQUEST['action'], $this->ignoreActions))
-		)
+		if ($this->isDisabled() || isset($_REQUEST['xml']) || $this->isIgnoredAction())
 			return;
 
 		$this->init();
@@ -170,7 +172,7 @@ class SimpleSEF
 		// If the URL contains index.php but not our ignored actions, rewrite the URL
 		if (
 			str_contains($_SERVER['REQUEST_URL'], 'index.php')
-			&& ! (isset($_GET['xml']) || (! empty($_GET['action']) && in_array($_GET['action'], $this->ignoreActions)))
+			&& ! (isset($_GET['xml']) || (! empty($_GET['action']) && in_array($_GET['action'], $this->ignoredActions)))
 		) {
 			header('HTTP/1.1 301 Moved Permanently');
 			header('Location: ' . $this->getSefUrl($_SERVER['REQUEST_URL']));
@@ -214,10 +216,7 @@ class SimpleSEF
 	{
 		global $modSettings, $scripturl, $boardurl;
 
-		if (
-			empty($modSettings['simplesef_enable'])
-			|| (isset($_REQUEST['action']) && in_array($_REQUEST['action'], $this->ignoreActions))
-		)
+		if ($this->isDisabled() || $this->isIgnoredAction())
 			return $buffer;
 
 		if (isset($_REQUEST['xml']))
@@ -308,12 +307,9 @@ class SimpleSEF
 	 */
 	public function fixRedirectUrl(string &$setLocation): void
 	{
-		global $scripturl, $modSettings;
+		global $scripturl;
 
-		if (
-			empty($modSettings['simplesef_enable'])
-			|| (isset($_REQUEST['action']) && in_array($_REQUEST['action'], $this->ignoreActions))
-		)
+		if ($this->isDisabled() || $this->isIgnoredAction())
 			return;
 
 		static::$redirect = true;
@@ -338,10 +334,7 @@ class SimpleSEF
 	{
 		global $modSettings;
 
-		if (
-			empty($modSettings['simplesef_enable'])
-			|| (isset($_REQUEST['action']) && in_array($_REQUEST['action'], $this->ignoreActions))
-		)
+		if ($this->isDisabled() || $this->isIgnoredAction())
 			return;
 
 		if (! $do_footer && ! static::$redirect) {
@@ -365,12 +358,7 @@ class SimpleSEF
 	 */
 	public function fixEmailOutput(string &$subject, string &$message): bool
 	{
-		global $modSettings;
-
-		if (
-			empty($modSettings['simplesef_enable'])
-			|| (isset($_REQUEST['action']) && in_array($_REQUEST['action'], $this->ignoreActions))
-		) {
+		if ($this->isDisabled() || $this->isIgnoredAction()) {
 			return true;
 		}
 
@@ -494,7 +482,7 @@ class SimpleSEF
 	 */
 	public function basicSettings(bool $return_config = false)
 	{
-		global $sourcedir, $context, $txt, $scripturl, $modSettings, $boarddir;
+		global $sourcedir, $context, $txt, $scripturl, $boarddir;
 
 		require_once $sourcedir . '/ManageServer.php';
 
@@ -507,8 +495,9 @@ class SimpleSEF
 			['text', 'simplesef_space', 'size' => 6, 'subtext' => $txt['simplesef_space_desc']]
 		];
 
-		if ($return_config)
+		if ($return_config) {
 			return $config_vars;
+		}
 
 		// Saving?
 		if (isset($_GET['save'])) {
@@ -517,7 +506,7 @@ class SimpleSEF
 			$save_vars = $config_vars;
 
 			// We don't want to break boards, so we'll make sure some stuff exists before actually enabling
-			if (! empty($_POST['simplesef_enable']) && empty($modSettings['simplesef_enable'])) {
+			if (! empty($_POST['simplesef_enable']) && $this->isDisabled()) {
 				if (str_contains($_SERVER['SERVER_SOFTWARE'], 'IIS') && file_exists($boarddir . '/web.config')) {
 					$_POST['simplesef_enable'] = str_contains(implode('', file($boarddir . '/web.config')), '<action type="Rewrite" url="index.php?q={R:1}"') ? 1 : 0;
 				} elseif (! str_contains($_SERVER['SERVER_SOFTWARE'], 'IIS') && file_exists($boarddir . '/.htaccess')) {
@@ -669,9 +658,7 @@ class SimpleSEF
 	 */
 	public function modifyBasicSettings(array &$config_vars): void
 	{
-		global $modSettings;
-
-		if (empty($modSettings['simplesef_enable']))
+		if ($this->isDisabled())
 			return;
 
 		foreach ($config_vars as $id => $config_var) {
@@ -691,9 +678,9 @@ class SimpleSEF
 	 */
 	public function getSefUrl(string $url): string
 	{
-		global $modSettings, $sourcedir;
+		global $sourcedir;
 
-		if (empty($modSettings['simplesef_enable']))
+		if ($this->isDisabled())
 			return $url;
 
 		// Set our output strings to nothing.
@@ -710,7 +697,7 @@ class SimpleSEF
 
 		if (! empty($params['action'])) {
 			// If we're ignoring this action, just return the original URL
-			if (in_array($params['action'], $this->ignoreActions)) {
+			if (in_array($params['action'], $this->ignoredActions)) {
 				return $url;
 			}
 
@@ -925,7 +912,7 @@ class SimpleSEF
 		// Do we have an action?
 		if (
 			(in_array($current_value, $this->actions) || in_array($current_value, $this->aliasActions))
-			&& ! in_array($current_value, $this->ignoreActions)
+			&& ! in_array($current_value, $this->ignoredActions)
 		) {
 			$querystring['action'] = array_shift($url_parts);
 
@@ -1167,11 +1154,15 @@ class SimpleSEF
 		return $this->slugify->slugify($string);
 	}
 
-	private function setSlugify(): void
+	private function isDisabled(): bool
 	{
-		require_once __DIR__ . '/SimpleSEF-Db/vendor/autoload.php';
-		require_once __DIR__ . '/SimpleSEF-Db/CustomRuleProvider.php';
+		global $modSettings;
 
-		$this->slugify = new Slugify(['separator' => $this->spaceChar], new CustomRuleProvider());
+		return empty($modSettings['simplesef_enable']);
+	}
+
+	private function isIgnoredAction(): bool
+	{
+		return isset($_REQUEST['action']) && in_array($_REQUEST['action'], $this->ignoredActions);
 	}
 }

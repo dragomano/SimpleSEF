@@ -735,6 +735,11 @@ class SimpleSEF
 				unset($params['topic']);
 			}
 
+			if (empty($query_parts['action']) && ! empty($params['page'])) {
+				$query_parts['page'] = 'pages/' . $params['page'];
+				unset($params['page']);
+			}
+
 			foreach ($params as $key => $value) {
 				if ($value == '') {
 					$sefstring3 .= $key . '/';
@@ -769,6 +774,10 @@ class SimpleSEF
 
 		if (isset($query_parts['topic'])) {
 			$sefstring .= $query_parts['topic'] . '/';
+		}
+
+		if (isset($query_parts['page'])) {
+			$sefstring .= $query_parts['page'] . '/';
 		}
 
 		if (isset($sefstring2)) {
@@ -953,13 +962,21 @@ class SimpleSEF
 		}
 
 		if (! empty($url_parts)) {
-			if (isset($url_parts[1]) && ! str_contains($url_parts[0], '.')) {
-				$current_value = $url_parts[1];
+			if (isset($url_parts[1])) {
+				if ($url_parts[0] === 'pages') {
+					$current_value = $url_parts[1];
 
-				// Get the topic id
-				$topic = $current_value;
-				$topic = substr($topic, strrpos($topic, $this->spaceChar) + 1);
-				$querystring['topic'] = $topic;
+					// Get the page slug
+					$page = $current_value;
+					$querystring['page'] = $page;
+				} elseif (! str_contains($url_parts[0], '.')) {
+					$current_value = $url_parts[1];
+
+					// Get the topic id
+					$topic = $current_value;
+					$topic = substr($topic, strrpos($topic, $this->spaceChar) + 1);
+					$querystring['topic'] = $topic;
+				}
 			} else {
 				$current_value = array_pop($url_parts);
 
@@ -981,6 +998,7 @@ class SimpleSEF
 				empty($querystring['action'])
 				&& empty($querystring['board'])
 				&& empty($querystring['topic'])
+				&& empty($querystring['page'])
 				&& ! str_contains($url_parts[0], '.')
 			) {
 				$querystring['action'] = 'simplesef-404';
